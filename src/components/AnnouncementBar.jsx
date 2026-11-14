@@ -1,23 +1,50 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { getPublicSettings } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 const AnnouncementBar = () => {
+  const { lang, t } = useLanguage();
+  const [announcement, setAnnouncement] = useState({
+    active: true,
+    text: ''
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    getPublicSettings()
+      .then((settings) => {
+        if (!isMounted) return;
+        if (settings?.announcement) {
+          setAnnouncement({
+            active: settings.announcement.active !== false,
+            text: settings.announcement.text || ''
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (!announcement.active) {
+    return null;
+  }
+
+  // Display language-appropriate text:
+  // If the admin saved custom text, use it if it matches the current language, or display translated default
+  const defaultText = t('announcement.defaultText', 'Free shipping on eligible orders | Complimentary discovery sample with every purchase');
+  const displayText = (lang === 'ar' && announcement.text && /[\u0600-\u06FF]/.test(announcement.text))
+    ? announcement.text
+    : (lang === 'en' && announcement.text && !/[\u0600-\u06FF]/.test(announcement.text))
+      ? announcement.text
+      : defaultText;
+
   return (
-    <div className="bg-[#03204E] text-white py-3.5 px-4 w-full relative z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <button className="text-white/70 hover:text-white transition-colors focus:outline-none p-1 hidden sm:block">
-          <ChevronLeft size={16} strokeWidth={2} />
-        </button>
-        
-        <div className="flex-1 flex justify-center text-center items-center text-xs sm:text-sm font-light tracking-wide uppercase">
-          <span className="hidden sm:inline">Free Shipping On Orders Over 2000 EGP</span>
-          <span className="hidden sm:inline mx-3 text-white/50">|</span>
-          <span>Complimentary Samples With Every Order</span>
-        </div>
-        
-        <button className="text-white/70 hover:text-white transition-colors focus:outline-none p-1 hidden sm:block">
-          <ChevronRight size={16} strokeWidth={2} />
-        </button>
+    <div className="bg-[#174F43] text-white py-2 px-4 w-full relative z-40 transition-all duration-300">
+      <div className="max-w-[1200px] mx-auto flex items-center justify-center text-center text-xs tracking-wider">
+        <span>{displayText}</span>
       </div>
     </div>
   );

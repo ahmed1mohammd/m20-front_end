@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Homepage -->
+  <url>
+    <loc>https://m20fragrance.com/</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://m20fragrance.com/img/hero.png</image:loc>
+      <image:title>M20 Parfums Cairo | Luxury Extrait de Parfum</image:title>
+    </image:image>
+  </url>
+
+  <!-- All Fragrances Catalog -->
+  <url>
+    <loc>https://m20fragrance.com/shop</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/shop?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/shop?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- For Him Collection -->
+  <url>
+    <loc>https://m20fragrance.com/men</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/men?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/men?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- For Her Collection -->
+  <url>
+    <loc>https://m20fragrance.com/women</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/women?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/women?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Special Offers -->
+  <url>
+    <loc>https://m20fragrance.com/offers</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/offers?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/offers?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- About Maison -->
+  <url>
+    <loc>https://m20fragrance.com/about</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/about?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/about?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Policies -->
+  <url>
+    <loc>https://m20fragrance.com/policies</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Core Fragrances (BOM & Extrait de Parfum) -->
+  <url>
+    <loc>https://m20fragrance.com/product/crush</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/product/crush?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/product/crush?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://m20fragrance.com/product/crown</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/product/crown?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/product/crown?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://m20fragrance.com/product/night</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/product/night?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/product/night?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://m20fragrance.com/product/bloom</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/product/bloom?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/product/bloom?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://m20fragrance.com/product/cherry</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/product/cherry?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/product/cherry?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://m20fragrance.com/product/cloud</loc>
+    <xhtml:link rel="alternate" hreflang="ar-eg" href="https://m20fragrance.com/product/cloud?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en-eg" href="https://m20fragrance.com/product/cloud?lang=en" />
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>

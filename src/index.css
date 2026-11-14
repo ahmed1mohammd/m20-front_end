@@ -1,23 +1,448 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Ara Hamah 1982';
+  src: url('/fonts/AraHamah1982-Regular.woff2') format('woff2'),
+       url('/fonts/AraHamah1982-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AraHamah1982-Regular';
+  src: url('/fonts/AraHamah1982-Regular.woff2') format('woff2'),
+       url('/fonts/AraHamah1982-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-brand-green: #174F43;
+  --color-brand-green-dark: #0F3830;
+  --color-brand-orange: #FF9D00;
+  --color-brand-orange-hover: #E68D00;
+  --color-deep-emerald: #174F43;
+  --color-forest-green: #0F3830;
+  --color-champagne-gold: #FF9D00;
+  --color-soft-cream: #F4F3EF;
+  --color-rich-black: #0B0B0B;
+  --color-warm-stone: #FFF8EE;
+
+  --font-main: 'Ara Hamah 1982', 'AraHamah1982-Regular', 'Montserrat', sans-serif;
+  --font-serif: 'Ara Hamah 1982', 'AraHamah1982-Regular', 'Montserrat', sans-serif;
+  --font-display: 'Ara Hamah 1982', 'AraHamah1982-Regular', 'Montserrat', sans-serif;
+  --font-sans: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-cairo: 'Cairo', system-ui, -apple-system, sans-serif;
+}
+
 @layer base {
+  :root {
+    --color-accent: #FF9D00;
+    --color-accent-hover: #E68D00;
+    --color-primary: #174F43;
+    --color-primary-hover: #0F3830;
+    --color-forest: #0F3830;
+    --color-gold: #FF9D00;
+    --color-cream: #F4F3EF;
+    --color-stone: #FFF8EE;
+    --color-bg: #F4F3EF;
+    --color-surface: #ffffff;
+    --color-border: #e5e3dc;
+    --color-text-primary: #0B0B0B;
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748b;
+    --radius-base: 2px;
+    --overlay-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
   body {
-    background-color: #FFFFFF;
-    color: #03204E;
-    font-family: 'Playfair Display', Georgia, Cambria, "Times New Roman", Times, serif, system-ui;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
   }
+
+  /* Arabic Mode: Unified Cairo Typography */
+  :root[dir="rtl"] body,
+  html[dir="rtl"] body,
+  html[lang="ar"] body,
+  body.rtl,
+  [dir="rtl"] {
+    font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
+  }
+
+  /* English Headings & Main Display: Ara Hamah 1982 */
+  html[dir="ltr"] h1,
+  html[dir="ltr"] h2,
+  html[dir="ltr"] h3,
+  html[dir="ltr"] h4,
+  html[dir="ltr"] .font-serif,
+  html[dir="ltr"] .font-display,
+  html:not([dir="rtl"]) h1,
+  html:not([dir="rtl"]) h2,
+  html:not([dir="rtl"]) h3,
+  html:not([dir="rtl"]) h4,
+  html:not([dir="rtl"]) .font-serif,
+  html:not([dir="rtl"]) .font-display {
+    font-family: 'Ara Hamah 1982', 'AraHamah1982-Regular', 'Montserrat', sans-serif;
+  }
+
+  /* Arabic Headings: Cairo */
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4,
+  html[dir="rtl"] .font-serif,
+  html[dir="rtl"] .font-display,
+  html[lang="ar"] h1,
+  html[lang="ar"] h2,
+  html[lang="ar"] h3,
+  html[lang="ar"] h4,
+  html[lang="ar"] .font-serif,
+  html[lang="ar"] .font-display,
+  body.rtl h1,
+  body.rtl h2,
+  body.rtl h3,
+  body.rtl h4,
+  body.rtl .font-serif,
+  body.rtl .font-display {
+    font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@keyframes m20-wave-slide {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes m20-wave-slide-reverse {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes m20-marquee-left {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes m20-marquee-right {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.m20-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: m20-marquee-left 42s linear infinite;
+  will-change: transform;
+}
+
+.m20-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: m20-marquee-right 48s linear infinite;
+  will-change: transform;
+}
+
+.m20-brand-watermark {
+  color: rgba(255, 255, 255, 0.055);
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  user-select: none;
+  pointer-events: none;
+}
+
+.m20-stroke-text {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.035);
+}
+
+.m20-texture-drift-left {
+  animation: m20-wave-slide 45s linear infinite;
+  will-change: transform;
+}
+
+.m20-texture-drift-right {
+  animation: m20-wave-slide-reverse 55s linear infinite;
+  will-change: transform;
+}
+
+.m20-wave-slow {
+  animation: m20-wave-slide 22s linear infinite;
+  will-change: transform;
+}
+
+.m20-wave-reverse {
+  animation: m20-wave-slide-reverse 30s linear infinite;
+  will-change: transform;
+}
+
+.m20-marquee-wrapper:hover .m20-wave-slow,
+.m20-marquee-wrapper:hover .m20-wave-reverse {
+  animation-play-state: paused;
+}
+
+@keyframes m20-float-gentle {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
+}
+
+.m20-float-gentle {
+  animation: m20-float-gentle 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes m20-slide-settle {
+  0% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.m20-slide-settle {
+  animation: m20-slide-settle 8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+}
+
+@keyframes m20-orbit-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.m20-orbit-slow {
+  animation: m20-orbit-slow 32s linear infinite;
+  will-change: transform;
+}
+
+.m20-orbit-reverse {
+  animation: m20-orbit-slow 46s linear infinite reverse;
+  will-change: transform;
+}
+
+@keyframes m20-shimmer-sweep {
+  0% {
+    transform: translateX(-140%) skewX(-18deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.35;
+  }
+  55% {
+    transform: translateX(240%) skewX(-18deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(240%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+.m20-shimmer-sweep {
+  animation: m20-shimmer-sweep 7.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes m20-pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+  70% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.m20-pulse-ring {
+  animation: m20-pulse-ring 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes m20-kenburns-slow {
+  0%, 100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.06) translate3d(0, -4px, 0);
+  }
+}
+
+.m20-kenburns-slow {
+  animation: m20-kenburns-slow 16s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes m20-drift-slow {
+  0%, 100% {
+    transform: translate3d(-1.5%, 0, 0);
+  }
+  50% {
+    transform: translate3d(1.5%, 0, 0);
+  }
+}
+
+.m20-drift-slow {
+  animation: m20-drift-slow 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes m20-progress-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.m20-progress-fill {
+  animation: m20-progress-fill 4200ms linear forwards;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+[dir="rtl"] .m20-progress-fill {
+  transform-origin: right center;
+}
+
+@keyframes m20-shimmer-text {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.m20-shimmer-text {
+  background-size: 200% auto;
+  animation: m20-shimmer-text 4s ease infinite;
+}
+
+@keyframes m20-light-beam {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+.m20-light-beam {
+  animation: m20-light-beam 5.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes m20-beam-glow {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scaleX(0.96);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+}
+
+.m20-beam-glow {
+  animation: m20-beam-glow 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m20-marquee-left,
+  .m20-marquee-right,
+  .m20-wave-slow,
+  .m20-wave-reverse,
+  .m20-texture-drift-left,
+  .m20-texture-drift-right,
+  .m20-float-gentle,
+  .m20-slide-settle,
+  .m20-orbit-slow,
+  .m20-orbit-reverse,
+  .m20-shimmer-sweep,
+  .m20-shimmer-text,
+  .m20-light-beam,
+  .m20-beam-glow,
+  .m20-pulse-ring,
+  .m20-kenburns-slow,
+  .m20-drift-slow,
+  .m20-progress-fill {
+    animation: none !important;
+  }
+
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Modal and Dropdown real shadow token */
+.overlay-shadow {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #ffffff;
+  background: #F4F3EF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #03204E;
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

@@ -1,96 +1,113 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
+import { trackInitiateCheckout } from '../utils/tracking';
 
 const CartDrawer = () => {
   const { cart, removeFromCart, updateQuantity, cartSubtotal, isCartOpen, setIsCartOpen } = useCart();
+  const { t, formatPrice, translateProduct, isRTL } = useLanguage();
   const navigate = useNavigate();
 
   if (!isCartOpen) return null;
 
   const handleProceedToCheckout = () => {
+    trackInitiateCheckout({
+      items: cart.map(i => ({
+        productId: i.product?._id || i.product?.id,
+        name: i.product?.name,
+        price: i.variant?.price || i.price,
+        quantity: i.quantity
+      })),
+      total: cartSubtotal
+    });
     setIsCartOpen(false);
     navigate('/checkout');
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      {/* Overlay */}
+    <div className={`fixed inset-0 z-50 flex ${isRTL ? 'justify-start' : 'justify-end'}`} role="dialog" aria-modal="true" aria-label="Shopping bag">
+      {/* Overlay Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" 
+        className="fixed inset-0 bg-black/40 transition-opacity duration-150" 
         onClick={() => setIsCartOpen(false)} 
       />
 
       {/* Slide Drawer */}
-      <div className="relative w-full max-w-md bg-white h-full shadow-2xl z-10 flex flex-col justify-between">
+      <div className={`relative w-full max-w-md bg-white h-full ${isRTL ? 'border-r' : 'border-l'} border-slate-200 z-10 flex flex-col justify-between overlay-shadow`}>
         
-        {/* Drawer Header */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <ShoppingBag size={18} className="text-[#03204E]" />
-            <h3 className="text-sm font-serif uppercase tracking-widest text-[#03204E]">Your Shopping Bag</h3>
+        {/* Header */}
+        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2 text-right' : 'space-x-2 text-left'}`}>
+            <ShoppingBag size={18} strokeWidth={1.5} className="text-[#174F43]" />
+            <h3 className="text-xs uppercase tracking-widest font-semibold text-[#174F43]">{t('cart.title', 'Shopping bag')}</h3>
           </div>
           <button 
             onClick={() => setIsCartOpen(false)}
-            className="text-slate-400 hover:text-[#03204E] transition-colors p-1"
+            className="text-slate-500 hover:text-[#174F43] transition-colors duration-150 p-1 cursor-pointer"
+            aria-label="Close cart"
           >
-            <X size={20} />
+            <X size={18} strokeWidth={1.5} />
           </button>
         </div>
 
-        {/* Cart Items List */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+        {/* Items List */}
+        <div className={`p-5 overflow-y-auto flex-1 space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}>
           {cart.length === 0 ? (
-            <div className="text-center py-16 space-y-4">
-              <ShoppingBag size={40} strokeWidth={1} className="mx-auto text-slate-300" />
-              <p className="text-xs uppercase tracking-widest text-slate-400">Your bag is currently empty</p>
+            <div className="text-center py-16 space-y-3">
+              <ShoppingBag size={32} strokeWidth={1.5} className="mx-auto text-slate-300" />
+              <p className="text-xs uppercase tracking-widest text-slate-500">{t('cart.empty', 'Your bag is currently empty')}</p>
+              <p className="text-xs text-slate-400 font-light">{t('cart.emptySub', 'Explore our catalog and find your signature fragrance.')}</p>
             </div>
           ) : (
             cart.map((item, idx) => {
-              const product = item.product;
+              const product = translateProduct(item.product);
               const variant = item.variant;
               const imgUrl = product.images?.[0]?.url || '/img/product.png';
 
               return (
-                <div key={idx} className="flex items-center space-x-4 border-b border-slate-100 pb-4">
+                <div key={idx} className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} border-b border-slate-100 pb-3`}>
                   <img
                     src={imgUrl}
                     alt={product.name}
-                    className="w-16 h-16 object-cover bg-slate-50 border border-slate-100"
+                    className="w-14 h-14 object-contain bg-slate-50/70 border border-slate-200 p-1 rounded-sm"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = '/img/product.png';
                     }}
                   />
                   <div className="flex-1">
-                    <h4 className="text-xs font-serif uppercase text-[#03204E]">{product.name}</h4>
-                    <p className="text-[11px] text-slate-400">{variant?.size || '100ml'}</p>
-                    <div className="flex items-center space-x-3 mt-2">
+                    <h4 className="text-xs uppercase font-medium text-[#174F43]">{product.name}</h4>
+                    <p className="text-[11px] text-slate-500">{variant?.size || '50ml'}</p>
+                    <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} mt-1.5`}>
                       <button
                         onClick={() => updateQuantity(idx, -1)}
-                        className="w-5 h-5 border border-slate-200 text-xs flex items-center justify-center text-[#03204E]"
+                        className="w-5 h-5 border border-slate-300 text-xs flex items-center justify-center text-[#174F43] hover:bg-slate-100 rounded-sm cursor-pointer"
+                        aria-label="Decrease quantity"
                       >
                         -
                       </button>
-                      <span className="text-xs font-medium">{item.quantity}</span>
+                      <span className="text-xs font-medium px-1">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(idx, 1)}
-                        className="w-5 h-5 border border-slate-200 text-xs flex items-center justify-center text-[#03204E]"
+                        className="w-5 h-5 border border-slate-300 text-xs flex items-center justify-center text-[#174F43] hover:bg-slate-100 rounded-sm cursor-pointer"
+                        aria-label="Increase quantity"
                       >
                         +
                       </button>
                     </div>
                   </div>
-                  <div className="text-right space-y-2">
-                    <span className="text-xs font-semibold text-[#03204E]">
-                      ${(variant?.price || 0) * item.quantity}
+                  <div className={`${isRTL ? 'text-left' : 'text-right'} space-y-2`}>
+                    <span className="text-xs font-semibold text-[#174F43]">
+                      {formatPrice((variant?.price || 0) * item.quantity)}
                     </span>
                     <button
                       onClick={() => removeFromCart(idx)}
-                      className="block text-slate-300 hover:text-red-500 transition-colors ml-auto"
+                      className={`block text-slate-400 hover:text-red-700 transition-colors duration-150 ${isRTL ? 'mr-auto' : 'ml-auto'} p-1 cursor-pointer`}
+                      aria-label="Remove item"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={14} strokeWidth={1.5} />
                     </button>
                   </div>
                 </div>
@@ -101,17 +118,17 @@ const CartDrawer = () => {
 
         {/* Footer Summary */}
         {cart.length > 0 && (
-          <div className="p-6 border-t border-slate-100 bg-slate-50 space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="uppercase tracking-widest text-slate-500 text-xs">Subtotal</span>
-              <span className="font-semibold text-[#03204E]">${cartSubtotal}</span>
+          <div className={`p-5 border-t border-slate-200 bg-slate-50/70 space-y-3 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className="flex items-center justify-between text-xs">
+              <span className="uppercase tracking-widest text-slate-500">{t('cart.subtotal', 'Subtotal')}</span>
+              <span className="font-semibold text-[#174F43] text-sm">{formatPrice(cartSubtotal)}</span>
             </div>
-            <p className="text-[10px] text-slate-400">Taxes and shipping calculated at checkout.</p>
+            <p className="text-[11px] text-slate-500">{t('cart.shippingNotice', 'Taxes and delivery fee calculated at checkout.')}</p>
             <button
               onClick={handleProceedToCheckout}
-              className="w-full bg-[#03204E] text-white py-3.5 text-xs uppercase tracking-[0.2em] font-medium hover:bg-slate-800 transition-colors"
+              className="w-full bg-[#174F43] text-white py-3 text-xs uppercase tracking-widest font-medium hover:bg-[#0F3830] transition-colors duration-150 h-10 rounded-sm cursor-pointer shadow-sm active:scale-[0.99]"
             >
-              Checkout
+              {t('cart.checkoutBtn', 'Proceed to checkout')}
             </button>
           </div>
         )}

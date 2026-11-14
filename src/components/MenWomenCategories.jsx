@@ -3,61 +3,51 @@ import { Link } from 'react-router-dom';
 
 const MenWomenCategories = () => {
   return (
-    <section className="bg-white py-14 border-t border-slate-100">
+    <section className="bg-[#F4F3EF] py-12 md:py-16 border-t border-slate-200/80">
       <div className="max-w-[1200px] mx-auto px-6">
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           
-          {/* FOR HIM */}
-          <div className="group relative bg-[#FAFAFA] overflow-hidden aspect-[4/3] flex flex-col justify-end p-8 text-left">
-            <img
-              src="/img/hero.png"
-              alt="For Him Collection"
-              className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = '/img/product.png';
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/40 to-transparent"></div>
-            
-            <div className="relative z-10 space-y-2">
-              <span className="text-[10px] uppercase tracking-[0.3em] text-slate-400 font-medium block">
-                The Masculine Signature
+          {/* For Him */}
+          <div className="border border-slate-200 bg-slate-50/70 p-8 flex flex-col justify-between rounded-sm min-h-[320px]">
+            <div className="space-y-2 text-left">
+              <span className="text-xs uppercase tracking-widest text-[#FF9D00] font-semibold block">
+                The masculine signature
               </span>
-              <h2 className="text-2xl font-serif text-[#03204E] uppercase">FOR HIM</h2>
+              <h2 className="text-2xl font-serif text-[#174F43] uppercase">For him</h2>
+              <p className="text-xs text-slate-600 font-light max-w-sm">
+                Deep woods, crisp spices, and warm amber notes formulated for bold endurance.
+              </p>
+            </div>
+            
+            <div className="pt-6 text-left">
               <Link
                 to="/men"
-                className="inline-block border-b border-[#03204E] text-[#03204E] text-xs uppercase tracking-widest font-semibold pb-0.5 hover:opacity-60 transition-opacity"
+                className="inline-flex items-center justify-center border border-[#174F43] text-[#174F43] px-5 py-2.5 text-xs uppercase tracking-widest font-semibold rounded-sm hover:bg-[#174F43] hover:text-white transition-colors duration-150 h-10"
               >
-                Shop Now
+                Shop collection
               </Link>
             </div>
           </div>
 
-          {/* FOR HER */}
-          <div className="group relative bg-[#FAFAFA] overflow-hidden aspect-[4/3] flex flex-col justify-end p-8 text-left">
-            <img
-              src="/img/About.png"
-              alt="For Her Collection"
-              className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = '/img/product.png';
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/40 to-transparent"></div>
-            
-            <div className="relative z-10 space-y-2">
-              <span className="text-[10px] uppercase tracking-[0.3em] text-slate-400 font-medium block">
-                The Feminine Aura
+          {/* For Her */}
+          <div className="border border-slate-200 bg-slate-50/70 p-8 flex flex-col justify-between rounded-sm min-h-[320px]">
+            <div className="space-y-2 text-left">
+              <span className="text-xs uppercase tracking-widest text-[#FF9D00] font-semibold block">
+                The feminine aura
               </span>
-              <h2 className="text-2xl font-serif text-[#03204E] uppercase">FOR HER</h2>
+              <h2 className="text-2xl font-serif text-[#174F43] uppercase">For her</h2>
+              <p className="text-xs text-slate-600 font-light max-w-sm">
+                Velvet floras, delicate vanillas, and radiant citrus accords crafted for quiet elegance.
+              </p>
+            </div>
+            
+            <div className="pt-6 text-left">
               <Link
                 to="/women"
-                className="inline-block border-b border-[#03204E] text-[#03204E] text-xs uppercase tracking-widest font-semibold pb-0.5 hover:opacity-60 transition-opacity"
+                className="inline-flex items-center justify-center border border-[#174F43] text-[#174F43] px-5 py-2.5 text-xs uppercase tracking-widest font-semibold rounded-sm hover:bg-[#174F43] hover:text-white transition-colors duration-150 h-10"
               >
-                Shop Now
+                Shop collection
               </Link>
             </div>
           </div>

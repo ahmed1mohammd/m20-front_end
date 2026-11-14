@@ -1,17 +1,81 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getActiveOffers, getPublicSettings } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
-const OFFER_SLIDES = [
-  { id: 1, image: '/img/offers.png', alt: 'ÉLAN Special Offers', link: '/offers' },
-  { id: 2, image: '/img/hero.png', alt: 'ÉLAN New Arrivals', link: '/offers' },
-  { id: 3, image: '/img/About.png', alt: 'ÉLAN Collection', link: '/offers' },
+const DEFAULT_SLIDES = [
+  { id: 'def-1', image: '/img/offers.png', alt: 'M20 Special Offers', link: '/offers' },
+  { id: 'def-2', image: '/img/hero.png', alt: 'M20 New Arrivals', link: '/shop' },
 ];
 
 const OfferCarousel = () => {
+  const [slides, setSlides] = useState(DEFAULT_SLIDES);
   const [current, setCurrent] = useState(0);
   const navigate = useNavigate();
-  const total = OFFER_SLIDES.length;
+  const { isRTL } = useLanguage();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSlides = async () => {
+      try {
+        const settings = await getPublicSettings();
+        if (!isMounted) return;
+
+        const cmsSlides = Array.isArray(settings?.heroSlides)
+          ? settings.heroSlides
+              .filter((s) => s && s.active !== false && s.image && !String(s.image).startsWith('blob:'))
+              .map((s, idx) => ({
+                id: s._id || s.id || `cms-${idx}`,
+                image: s.image,
+                alt: s.alt || 'M20 Collection',
+                link: s.link || '/shop',
+              }))
+          : [];
+
+        if (cmsSlides.length > 0) {
+          setSlides(cmsSlides);
+          setCurrent(0);
+          return;
+        }
+
+        const offers = await getActiveOffers();
+        if (!isMounted) return;
+
+        const seenUrls = new Set();
+        const offerSlides = Array.isArray(offers)
+          ? offers
+              .filter((o) => {
+                const url = o?.bannerImage?.url;
+                if (!url || seenUrls.has(url)) return false;
+                seenUrls.add(url);
+                return true;
+              })
+              .map((o) => ({
+                id: o._id,
+                image: o.bannerImage.url,
+                alt: o.title || 'M20 Offer',
+                link: '/offers',
+              }))
+          : [];
+
+        if (offerSlides.length > 0) {
+          setSlides(offerSlides);
+          setCurrent(0);
+        }
+      } catch (err) {
+        console.error('Failed to load slides for carousel:', err);
+      }
+    };
+
+    fetchSlides();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const total = slides.length;
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % total);
@@ -21,72 +85,83 @@ const OfferCarousel = () => {
     setCurrent((prev) => (prev - 1 + total) % total);
   }, [total]);
 
-  // Auto-advance every 5 seconds
   useEffect(() => {
-    const timer = setInterval(next, 5000);
+    if (total <= 1) return undefined;
+    const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, total]);
 
   const handleSlideClick = (link) => {
-    navigate(link);
+    navigate(link || '/shop');
   };
 
   return (
-    <section className="relative w-full bg-white overflow-hidden">
-      {/* Slides Container */}
-      <div className="relative w-full aspect-[21/9] sm:aspect-[21/8] md:aspect-[21/7] overflow-hidden">
-        {OFFER_SLIDES.map((slide, idx) => (
-          <div
-            key={slide.id}
-            onClick={() => handleSlideClick(slide.link)}
-            className={`absolute inset-0 w-full h-full cursor-pointer transition-opacity duration-700 ease-in-out ${
-              idx === current ? 'opacity-100 z-10' : 'opacity-0 z-0'
-            }`}
-          >
-            <img
-              src={slide.image}
-              alt={slide.alt}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = '/img/product.png';
-              }}
-            />
-          </div>
-        ))}
-      </div>
+    <section className="relative w-full bg-white overflow-hidden border-b border-slate-200/80">
+      <div className="relative w-full overflow-hidden">
+        {slides.map((slide, idx) => {
+          const isActive = idx === current;
+          return (
+            <div
+              key={slide.id || idx}
+              onClick={() => handleSlideClick(slide.link)}
+              className={`w-full cursor-pointer transition-opacity duration-200 ease-out ${
+                isActive
+                  ? 'relative opacity-100 z-10'
+                  : 'absolute inset-0 h-full opacity-0 z-0 pointer-events-none'
+              }`}
+            >
+              <img
+                src={slide.image}
+                alt={slide.alt}
+                className={isActive ? 'w-full h-auto block m20-slide-settle' : 'w-full h-full object-contain object-center block'}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/img/offers.png';
+                }}
+              />
+            </div>
+          );
+        })}
 
-      {/* Minimal Arrows */}
-      <button
-        onClick={(e) => { e.stopPropagation(); prev(); }}
-        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-9 h-9 flex items-center justify-center bg-white/80 hover:bg-white text-[#03204E] transition-colors"
-        aria-label="Previous offer"
-      >
-        <ChevronLeft size={18} strokeWidth={1.5} />
-      </button>
+        {/* Carousel Controls */}
+        {total > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); isRTL ? next() : prev(); }}
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-9 h-9 flex items-center justify-center bg-white border border-slate-200 text-[#174F43] hover:bg-slate-100 transition-colors duration-150 rounded-sm cursor-pointer shadow-xs"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={16} strokeWidth={1.5} />
+            </button>
 
-      <button
-        onClick={(e) => { e.stopPropagation(); next(); }}
-        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-9 h-9 flex items-center justify-center bg-white/80 hover:bg-white text-[#03204E] transition-colors"
-        aria-label="Next offer"
-      >
-        <ChevronRight size={18} strokeWidth={1.5} />
-      </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); isRTL ? prev() : next(); }}
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-9 h-9 flex items-center justify-center bg-white border border-slate-200 text-[#174F43] hover:bg-slate-100 transition-colors duration-150 rounded-sm cursor-pointer shadow-xs"
+              aria-label="Next slide"
+            >
+              <ChevronRight size={16} strokeWidth={1.5} />
+            </button>
 
-      {/* Minimal Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-2">
-        {OFFER_SLIDES.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={(e) => { e.stopPropagation(); setCurrent(idx); }}
-            className={`transition-all duration-300 rounded-full ${
-              idx === current
-                ? 'w-6 h-1.5 bg-[#03204E]'
-                : 'w-1.5 h-1.5 bg-[#03204E]/30 hover:bg-[#03204E]/50'
-            }`}
-            aria-label={`Go to slide ${idx + 1}`}
-          />
-        ))}
+            {/* Dots */}
+            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setCurrent(idx); }}
+                  className={`transition-colors duration-150 rounded-sm h-1.5 cursor-pointer ${
+                    idx === current
+                      ? 'w-5 bg-[#174F43]'
+                      : 'w-2 bg-slate-300 hover:bg-slate-400'
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

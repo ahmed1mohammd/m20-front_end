@@ -1,61 +1,40 @@
-import React from 'react';
+﻿import React from 'react';
 import ProductCard from './ProductCard';
+import Reveal from './Reveal';
+import { useLanguage } from '../context/LanguageContext';
+import { FALLBACK_CATALOG } from '../data/fallbackCatalog';
 
 const MostWanted = ({ products = [] }) => {
-  // Selected products for home grid
-  const fallbackProducts = [
-    {
-      _id: 'prod-noir',
-      name: 'ÉLAN NOIR',
-      slug: 'elan-noir',
-      fragranceFamily: 'Woody & Amber',
-      shortDescription: 'Black Cardamom, Velvet Oud, and Smoked Amber engineered for long endurance.',
-      price: 599,
-      variants: [{ _id: 'v1', size: '50ml', price: 599, stock: 15, SKU: 'ELN-50' }],
-      images: [{ url: '/img/product.png', alt: 'Élan Noir' }]
-    },
-    {
-      _id: 'prod-vetiver',
-      name: 'ROYAL VETIVER',
-      slug: 'royal-vetiver',
-      fragranceFamily: 'Fresh Earthy',
-      shortDescription: 'Haitian Vetiver, Italian Bergamot, and Pink Pepper for a refined masculine aura.',
-      price: 549,
-      variants: [{ _id: 'v3', size: '50ml', price: 549, stock: 20, SKU: 'RV-50' }],
-      images: [{ url: '/img/product.png', alt: 'Royal Vetiver' }]
-    },
-    {
-      _id: 'prod-soleil',
-      name: 'SOLEIL BLANC',
-      slug: 'soleil-blanc',
-      fragranceFamily: 'Floral Citrus',
-      shortDescription: 'Neroli Blossom, White Amber, and Cashmere Wood crafted for distinction.',
-      price: 579,
-      variants: [{ _id: 'v5', size: '50ml', price: 579, stock: 18, SKU: 'SB-50' }],
-      images: [{ url: '/img/product.png', alt: 'Soleil Blanc' }]
-    }
-  ];
+  const { t, translateProduct } = useLanguage();
 
-  const displayProducts = (products && products.length > 0) ? products.slice(0, 3) : fallbackProducts;
+  const sourceProducts = (products && products.length > 0) ? products.slice(0, 3) : FALLBACK_CATALOG.slice(0, 3);
+  const displayProducts = sourceProducts.map((p) => translateProduct(p));
 
   return (
-    <section className="bg-white py-14 border-t border-slate-100">
+    <section className="bg-[#F4F3EF] py-12 md:py-16 border-t border-slate-200/80">
       <div className="max-w-[1200px] mx-auto px-6">
         
         {/* Header */}
-        <div className="text-center max-w-xl mx-auto mb-12 space-y-2">
-          <span className="text-[11px] uppercase tracking-[0.3em] text-slate-400 font-medium block">
-            Curated Selection
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-serif text-[#03204E] tracking-tight uppercase">
-            MOST WANTED
-          </h2>
-        </div>
+        <Reveal direction="up">
+          <div className="text-center max-w-xl mx-auto mb-10 space-y-1">
+            <span className="text-xs uppercase tracking-widest text-slate-500 font-medium block">
+              {t('mostWanted.tag', 'Curated selection')}
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-serif text-[#174F43] tracking-tight uppercase">
+              {t('mostWanted.title', 'Most wanted')}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-light mt-1">
+              {t('mostWanted.desc', 'Discover our most celebrated signature fragrances crafted for indelible presence.')}
+            </p>
+          </div>
+        </Reveal>
 
-        {/* 3-Column Clean Grid using ProductCard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
-          {displayProducts.map((product) => (
-            <ProductCard key={product._id || product.id} product={product} />
+        {/* 3-Column Clean Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {displayProducts.map((product, idx) => (
+            <Reveal key={product._id || product.id || idx} delay={idx * 120} direction="up">
+              <ProductCard product={product} />
+            </Reveal>
           ))}
         </div>
 
