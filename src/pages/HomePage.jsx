@@ -27,10 +27,10 @@ const HomePage = () => {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     'name': 'M20 Haute Parfumerie',
-    'url': 'https://m20fragrance.com',
+    'url': 'https://m20fragrance.store',
     'potentialAction': {
       '@type': 'SearchAction',
-      'target': 'https://m20fragrance.com/shop?q={search_term_string}',
+      'target': 'https://m20fragrance.store/shop?q={search_term_string}',
       'query-input': 'required name=search_term_string'
     }
   };

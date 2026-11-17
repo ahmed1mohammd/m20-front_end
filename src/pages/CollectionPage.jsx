@@ -121,7 +121,7 @@ const CollectionPage = ({ category = 'All', titleKey }) => {
         '@type': 'ListItem',
         'position': idx + 1,
         'name': p.name,
-        'url': `https://m20fragrance.com/product/${p._id || p.id}`
+        'url': `https://m20fragrance.store/product/${p._id || p.id}`
       }))
     }
   };

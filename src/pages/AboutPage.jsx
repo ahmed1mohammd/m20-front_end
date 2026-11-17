@@ -202,7 +202,7 @@ const AboutPage = () => {
     '@type': 'AboutPage',
     name: lang === 'ar' ? 'قصتنا وتراثنا • دار M20 للعطور الفاخرة' : 'Our Story • M20 Fine Fragrances',
     description: t('about.metaDesc', 'The story of M20, modern Egyptian Haute Parfumerie crafting artisanal luxury perfumes formulated for endurance and presence.'),
-    url: 'https://m20fragrance.com/about',
+    url: 'https://m20fragrance.store/about',
   };
 
   const chapterWord = lang === 'ar' ? 'الفصل' : 'CHAPTER';

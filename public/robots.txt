@@ -7,5 +7,6 @@ Disallow: /account
 Disallow: /login
 Disallow: /register
 Disallow: /auth
+Disallow: /track-order
 
-Sitemap: https://m20fragrance.com/sitemap.xml
+Sitemap: https://m20fragrance.store/sitemap.xml

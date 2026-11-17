@@ -58,7 +58,7 @@ export const SEO = ({
 
   const currentUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}${location.pathname}`
-    : `https://m20fragrance.com${location.pathname}`;
+    : `https://m20fragrance.store${location.pathname}`;
   
   const fullTitle = title 
     ? `${title} | M20 Haute Parfumerie`
@@ -66,7 +66,7 @@ export const SEO = ({
 
   const fullImageUrl = image.startsWith('http') 
     ? image 
-    : (typeof window !== 'undefined' ? `${window.location.origin}${image}` : `https://m20fragrance.com${image}`);
+    : (typeof window !== 'undefined' ? `${window.location.origin}${image}` : `https://m20fragrance.store${image}`);
 
   useEffect(() => {
     // 1. Title

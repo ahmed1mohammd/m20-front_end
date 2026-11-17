@@ -1,5 +1,17 @@
 {
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    {
+      "source": "/product/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|facebot|whatsapp|twitterbot|linkedinbot|slackbot|telegrambot|pinterest|discordbot|googlebot|bingbot|applebot|skypeuripreview|embedly).*"
+        }
+      ],
+      "destination": "/api/seo?id=:id"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

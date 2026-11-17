@@ -19,7 +19,6 @@ import OrderTrackingPage from './pages/OrderTrackingPage';
 import AccountPage from './pages/AccountPage';
 import LoginPage from './pages/LoginPage';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
-import SEOHead from './components/SEOHead';
 import { captureAttribution } from './utils/attribution';
 import { initTracking, trackPageView } from './utils/tracking';
 import { getPublicSettings } from './services/api';
@@ -53,9 +52,6 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-[#F4F3EF] text-[#0B0B0B]">
-      {/* Dynamic SEO & JSON-LD (Default Global Head) */}
-      <SEOHead />
-
       {/* Dynamic Route & Tracking Watcher */}
       <RouteAndTrackingWatcher />
 

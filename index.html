@@ -27,10 +27,12 @@
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://m20fragrance.store/" />
+    <link rel="canonical" href="https://m20fragrance.store/" />
     <meta property="og:site_name" content="M20 Haute Parfumerie" />
     <meta property="og:title" content="M20 | Signature Haute Parfumerie • عطور M20 الفاخرة" />
     <meta property="og:description" content="Artisanal luxury fragrances engineered for exceptional longevity and distinct sillage. Crafted with rare essences in Cairo, Egypt." />
-    <meta property="og:image" content="/img/hero.png" />
+    <meta property="og:image" content="https://m20fragrance.store/img/hero.png" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:locale:alternate" content="ar_EG" />
 
@@ -38,7 +40,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="M20 | Signature Haute Parfumerie • عطور M20 الفاخرة" />
     <meta name="twitter:description" content="Artisanal luxury fragrances engineered for exceptional longevity and distinct sillage in Egypt." />
-    <meta name="twitter:image" content="/img/hero.png" />
+    <meta name="twitter:image" content="https://m20fragrance.store/img/hero.png" />
 
     <!-- Preloads -->
     <link rel="preload" as="image" href="/img/زجاجة عطر نوار الفاخرة.png" />
@@ -51,14 +53,19 @@
       "@graph": [
         {
           "@type": "Organization",
-          "@id": "https://m20fragrance.com/#organization",
+          "@id": "https://m20fragrance.store/#organization",
           "name": "M20 Fine Fragrances",
           "alternateName": "عطور M20",
-          "url": "https://m20fragrance.com",
+          "url": "https://m20fragrance.store",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://m20fragrance.com/img/m20-logo-gold.png"
+            "url": "https://m20fragrance.store/img/m20-logo-gold.png"
           },
+          "sameAs": [
+            "https://instagram.com/elan.perfumes",
+            "https://tiktok.com/@elan.perfumes",
+            "https://facebook.com/elan.perfumes.eg"
+          ],
           "contactPoint": {
             "@type": "ContactPoint",
             "telephone": "+201132687324",
@@ -69,12 +76,12 @@
         },
         {
           "@type": "WebSite",
-          "@id": "https://m20fragrance.com/#website",
-          "url": "https://m20fragrance.com",
+          "@id": "https://m20fragrance.store/#website",
+          "url": "https://m20fragrance.store",
           "name": "M20 Haute Parfumerie",
           "description": "Artisanal Haute Parfumerie & Luxury Fragrances in Egypt",
           "publisher": {
-            "@id": "https://m20fragrance.com/#organization"
+            "@id": "https://m20fragrance.store/#organization"
           }
         }
       ]

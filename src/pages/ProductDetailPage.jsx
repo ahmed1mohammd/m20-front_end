@@ -6,7 +6,6 @@ import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { sortVariantsBySize, getProductPriceSummary } from '../utils/productPricing';
 import SEO from '../components/SEO';
-import SEOHead from '../components/SEOHead';
 import { trackViewContent, trackAddToCart } from '../utils/tracking';
 import {
   Plus,
@@ -345,11 +344,17 @@ const ProductDetailPage = () => {
 
   const productImg = mainImage?.url || product.mainImage?.url || product.images?.[0]?.url || '/img/product.png';
 
+  const productUrl = `https://m20fragrance.store/product/${id || product.slug || product._id || product.id}`;
   const productSchema = {
     '@context': 'https://schema.org',
+    '@graph': [
+      {
     '@type': 'Product',
+    '@id': `${productUrl}#product`,
     'name': product.name,
-    'image': productImg.startsWith('http') ? productImg : `https://m20fragrance.com${productImg}`,
+    'url': productUrl,
+    'sku': selectedVariant?.SKU || String(product.slug || product._id || product.id || ''),
+    'image': productImg.startsWith('http') ? productImg : `https://m20fragrance.store${productImg}`,
     'description': fullDesc || shortDesc || `M20 Haute Parfumerie: ${product.name}`,
     'brand': {
       '@type': 'Brand',
@@ -357,7 +362,7 @@ const ProductDetailPage = () => {
     },
     'offers': {
       '@type': 'Offer',
-      'url': `https://m20fragrance.com/product/${product._id || product.id}`,
+      'url': productUrl,
       'priceCurrency': 'EGP',
       'price': price,
       'priceValidUntil': '2027-12-31',
@@ -368,6 +373,16 @@ const ProductDetailPage = () => {
         'name': 'M20 Haute Parfumerie',
       },
     },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://m20fragrance.store/' },
+          { '@type': 'ListItem', 'position': 2, 'name': 'Catalog', 'item': 'https://m20fragrance.store/shop' },
+          { '@type': 'ListItem', 'position': 3, 'name': product.name, 'item': productUrl },
+        ],
+      },
+    ],
   };
 
   const discountPct = hasDiscount ? Math.round((1 - Number(price) / Number(oldPrice)) * 100) : 0;
@@ -389,14 +404,15 @@ const ProductDetailPage = () => {
 
   return (
     <div className="bg-[#F4F3EF] selection:bg-[#174F43] selection:text-white">
-      <SEOHead
-        product={rawProduct || product}
-        title={`${product.name} • ${t('productDetail.concentration', 'Extrait de Parfum')}`}
-        titleAr={`${product.name} • عطور M20 الفاخرة مصر`}
-        description={fullDesc || shortDesc || `Buy ${product.name} online from M20 Fine Fragrances.`}
+      <SEO
+        title={lang === 'ar'
+          ? `${product.name} • عطور M20 الفاخرة مصر`
+          : `${product.name} • ${t('productDetail.concentration', 'Extrait de Parfum')}`}
+        description={(shortDesc || fullDesc || `Buy ${product.name} online from M20 Fine Fragrances.`).slice(0, 300)}
         image={productImg}
         type="product"
-        canonicalUrl={typeof window !== 'undefined' ? window.location.href.split('?')[0] : undefined}
+        schema={productSchema}
+        schemaId="product-schema"
       />
 
       {/* Breadcrumbs */}
