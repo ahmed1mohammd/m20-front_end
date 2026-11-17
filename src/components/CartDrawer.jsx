@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { X, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
-import { trackInitiateCheckout } from '../utils/tracking';
 
 const CartDrawer = () => {
   const { cart, removeFromCart, updateQuantity, cartSubtotal, isCartOpen, setIsCartOpen } = useCart();
@@ -13,15 +12,7 @@ const CartDrawer = () => {
   if (!isCartOpen) return null;
 
   const handleProceedToCheckout = () => {
-    trackInitiateCheckout({
-      items: cart.map(i => ({
-        productId: i.product?._id || i.product?.id,
-        name: i.product?.name,
-        price: i.variant?.price || i.price,
-        quantity: i.quantity
-      })),
-      total: cartSubtotal
-    });
+    // InitiateCheckout is tracked once by CheckoutPage on mount
     setIsCartOpen(false);
     navigate('/checkout');
   };

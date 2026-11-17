@@ -7,6 +7,30 @@
 import { getStoredAttribution } from './attribution';
 
 let isInitialized = false;
+let pixelsReady = false;
+const pendingPixelCalls = [];
+
+/**
+ * Run pixel calls once Meta/TikTok scripts are initialised. Events that fire
+ * before the public settings arrive (first PageView, direct product/checkout
+ * visits) are queued and flushed by initTracking instead of being dropped.
+ */
+const firePixels = (fn) => {
+  if (typeof window === 'undefined') return;
+  if (pixelsReady) {
+    try { fn(); } catch (_) {}
+  } else if (pendingPixelCalls.length < 50) {
+    pendingPixelCalls.push(fn);
+  }
+};
+
+const flushPixelCalls = () => {
+  pixelsReady = true;
+  while (pendingPixelCalls.length) {
+    const fn = pendingPixelCalls.shift();
+    try { fn(); } catch (_) {}
+  }
+};
 let configuredMetaId = '';
 let configuredTikTokId = '';
 
@@ -69,7 +93,10 @@ export const initTracking = ({
   tiktokPixelId = ''
 } = {}) => {
   if (typeof window === 'undefined' || isInitialized) return;
-  if (!enableTracking) return;
+  if (!enableTracking) {
+    pendingPixelCalls.length = 0;
+    return;
+  }
 
   configuredMetaId = (metaPixelId || '').trim();
   configuredTikTokId = (tiktokPixelId || '').trim();
@@ -112,6 +139,7 @@ export const initTracking = ({
   }
 
   isInitialized = true;
+  flushPixelCalls();
 };
 
 /**
@@ -120,14 +148,14 @@ export const initTracking = ({
 export const trackPageView = (path = '') => {
   try {
     sendInternalFunnelEvent('page_view', { path });
-    if (typeof window !== 'undefined') {
+    firePixels(() => {
       if (typeof window.fbq === 'function') {
         window.fbq('track', 'PageView');
       }
       if (window.ttq && typeof window.ttq.page === 'function') {
         window.ttq.page();
       }
-    }
+    });
   } catch (_) {}
 };
 
@@ -146,7 +174,7 @@ export const trackViewContent = ({
     const contentId = String(id || name || 'm20-fragrance');
     sendInternalFunnelEvent('view_content', { productId: id, productName: name, value: val });
 
-    if (typeof window !== 'undefined') {
+    firePixels(() => {
       if (typeof window.fbq === 'function') {
         window.fbq('track', 'ViewContent', {
           content_name: name,
@@ -167,7 +195,7 @@ export const trackViewContent = ({
           currency: 'EGP'
         });
       }
-    }
+    });
   } catch (_) {}
 };
 
@@ -189,7 +217,7 @@ export const trackAddToCart = ({
     const contentId = String(id || name || 'm20-fragrance');
     sendInternalFunnelEvent('add_to_cart', { productId: id, productName: `${name} (${size})`, value: totalVal });
 
-    if (typeof window !== 'undefined') {
+    firePixels(() => {
       if (typeof window.fbq === 'function') {
         window.fbq('track', 'AddToCart', {
           content_name: `${name} (${size})`,
@@ -210,7 +238,7 @@ export const trackAddToCart = ({
           currency: 'EGP'
         });
       }
-    }
+    });
   } catch (_) {}
 };
 
@@ -227,7 +255,7 @@ export const trackInitiateCheckout = ({
     const numItems = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
     sendInternalFunnelEvent('initiate_checkout', { value: val });
 
-    if (typeof window !== 'undefined') {
+    firePixels(() => {
       if (typeof window.fbq === 'function') {
         window.fbq('track', 'InitiateCheckout', {
           content_ids: contentIds,
@@ -248,7 +276,7 @@ export const trackInitiateCheckout = ({
           currency: 'EGP'
         });
       }
-    }
+    });
   } catch (_) {}
 };
 
@@ -268,7 +296,7 @@ export const trackPurchase = ({
     const contentIds = items.map(i => String(i.productId || i.variantSKU || i.id || i.name));
     const numItems = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
 
-    if (typeof window !== 'undefined') {
+    firePixels(() => {
       // Meta Pixel Purchase with eventID for Server CAPI deduplication
       if (typeof window.fbq === 'function') {
         window.fbq(
@@ -302,6 +330,6 @@ export const trackPurchase = ({
           { event_id: resolvedEventId }
         );
       }
-    }
+    });
   } catch (_) {}
 };
