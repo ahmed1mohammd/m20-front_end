@@ -2,22 +2,60 @@
 import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { 
-  User, 
-  Phone, 
-  Mail, 
-  Lock, 
-  CheckCircle2, 
-  ShieldCheck, 
+import {
+  User,
+  Phone,
+  Mail,
+  Lock,
+  CheckCircle2,
+  ShieldCheck,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
   ArrowLeft,
   KeyRound,
-  Globe
+  Eye,
+  EyeOff,
+  PackageCheck,
+  Zap,
+  Sparkles,
 } from 'lucide-react';
 import SEO from '../components/SEO';
+
+/** Labelled input with an inline icon. `ltrInput` keeps emails/phones left-to-right inside RTL pages. */
+const Field = ({ id, label, icon: Icon, isRTL, ltrInput, right, ...inputProps }) => {
+  const pad =
+    ltrInput && isRTL
+      ? `pr-11 ${right ? 'pl-12' : 'pl-3.5'} text-left`
+      : `ps-11 ${right ? 'pe-12' : 'pe-3.5'}`;
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="text-xs uppercase tracking-[0.14em] text-slate-600 font-semibold block">
+        {label}
+      </label>
+      <div className="relative flex items-center h-12 bg-white border border-slate-300 hover:border-slate-400 focus-within:border-[#174F43] focus-within:ring-1 focus-within:ring-[#174F43] transition-colors">
+        <Icon size={17} className="absolute start-3.5 text-slate-400 pointer-events-none" />
+        <input
+          id={id}
+          dir={ltrInput ? 'ltr' : undefined}
+          className={`w-full h-full bg-transparent outline-none text-base sm:text-sm text-slate-900 placeholder:text-slate-400 ${pad}`}
+          {...inputProps}
+        />
+        {right}
+      </div>
+    </div>
+  );
+};
+
+const PrimaryButton = ({ children, ...props }) => (
+  <button
+    {...props}
+    className="group w-full h-12 bg-[#174F43] text-white text-xs font-semibold uppercase tracking-[0.2em] hover:bg-[#0F3830] active:scale-[0.99] disabled:bg-slate-300 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer"
+  >
+    {children}
+  </button>
+);
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -25,23 +63,23 @@ const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
 
-  const { 
-    isAuthenticated, 
-    login, 
+  const {
+    isAuthenticated,
+    login,
     requestOtp,
-    register, 
-    verifyOtp, 
+    register,
+    verifyOtp,
     resendOtp,
     pendingEmail,
     setPendingEmail
   } = useAuth();
 
-  const { lang, isRTL, dir, setLang, toggleLang, t } = useLanguage();
+  const { lang, isRTL, dir, setLang, t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState(initialMode); // 'login', 'register', or 'otp'
   const [loginMethod, setLoginMethod] = useState('otp'); // 'otp' | 'password'
   const [otpOriginTab, setOtpOriginTab] = useState('login');
-  
+
   // Login fields
   const [loginEmailOtp, setLoginEmailOtp] = useState('');
   const [loginIdentifier, setLoginIdentifier] = useState('');
@@ -52,6 +90,8 @@ const LoginPage = () => {
   const [regPhone, setRegPhone] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
+
+  const [showPassword, setShowPassword] = useState(false);
 
   // OTP fields
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
@@ -297,414 +337,371 @@ const LoginPage = () => {
     return 'Sign in or register for an M20 customer account to manage your bespoke perfume orders, address book, and exclusive member privileges.';
   };
 
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    setErrorMsg('');
+    setSuccessMsg('');
+  };
+
+  const BackIcon = isRTL ? ChevronRight : ChevronLeft;
+  const FwdIcon = isRTL ? ArrowLeft : ArrowRight;
+
+  const brandHeading =
+    activeTab === 'register'
+      ? (isRTL ? 'انضم إلى دار M20.' : 'Join the Maison.')
+      : activeTab === 'otp'
+      ? (isRTL ? 'خطوة أخيرة.' : 'One last step.')
+      : (isRTL ? 'أهلاً بعودتك إلى الدار.' : 'Welcome back to the Maison.');
+
+  const benefits = [
+    { icon: PackageCheck, text: isRTL ? 'تابع كل طلباتك لحظة بلحظة' : 'Track every order in real time' },
+    { icon: Zap, text: isRTL ? 'دفع أسرع وعناوين محفوظة' : 'Faster checkout with saved addresses' },
+    { icon: Sparkles, text: isRTL ? 'أولوية الوصول للإصدارات المحدودة' : 'First access to limited releases' },
+  ];
+
+  const tabCls = (active) =>
+    `flex-1 pb-3 text-xs font-semibold uppercase tracking-[0.18em] border-b-2 transition-colors cursor-pointer ${
+      active ? 'border-[#FF9D00] text-[#174F43]' : 'border-slate-200 text-slate-400 hover:text-slate-700'
+    }`;
+
+  const passwordToggle = (
+    <button
+      type="button"
+      onClick={() => setShowPassword((v) => !v)}
+      className="absolute end-1.5 w-9 h-9 flex items-center justify-center text-slate-400 hover:text-[#174F43] cursor-pointer"
+      aria-label={showPassword ? 'Hide password' : 'Show password'}
+    >
+      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+    </button>
+  );
+
   return (
-    <main 
-      dir={dir} 
-      className={`min-h-[85vh] bg-[#F4F3EF] py-12 md:py-20 px-4 sm:px-6 flex items-center justify-center relative overflow-hidden ${
-        isRTL ? "font-['Cairo',sans-serif]" : "font-sans"
+    <main
+      dir={dir}
+      className={`min-h-[85vh] grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] bg-[#F4F3EF] lg:p-6 lg:pb-10 ${
+        isRTL ? "font-['Cairo',sans-serif]" : 'font-sans'
       }`}
     >
-      <SEO 
-        title={getSeoTitle()}
-        description={getSeoDesc()}
-        noIndex={true}
-      />
-      
-      {/* Luxury Background Glow Elements */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#174F43]/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-72 h-72 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+      <SEO title={getSeoTitle()} description={getSeoDesc()} noIndex={true} />
 
-      <div className="w-full max-w-[460px] mx-auto relative z-10">
-        
-        {/* Brand Header & Language Switcher */}
-        <div className="flex items-center justify-between mb-6">
-          <Link 
-            to="/" 
-            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#174F43] transition-colors uppercase tracking-wider font-medium"
-            aria-label={t('auth.returnToBoutique', 'Return to M20 Boutique')}
-          >
-            {isRTL ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-            <span>{t('auth.returnToBoutique', 'Return to M20 Boutique')}</span>
-          </Link>
-
-          {/* Language Switcher Pill */}
-          <div className="flex items-center bg-white/80 backdrop-blur-xs border border-slate-200/90 rounded-full p-0.5 shadow-2xs text-[11px] font-bold">
-            <button
-              type="button"
-              onClick={() => setLang('en')}
-              className={`px-2.5 py-1 rounded-full transition-all duration-150 ${
-                lang === 'en'
-                  ? 'bg-[#174F43] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-black'
-              }`}
-            >
-              EN
-            </button>
-            <button
-              type="button"
-              onClick={() => setLang('ar')}
-              className={`px-2.5 py-1 rounded-full transition-all duration-150 ${
-                lang === 'ar'
-                  ? 'bg-[#174F43] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-black'
-              }`}
-            >
-              AR
-            </button>
-          </div>
+      {/* ===== Brand panel (desktop) ===== */}
+      {/* Brand emerald panel, framed by cream on every side (see main padding) so it never touches the footer. */}
+      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-[#174F43] text-white p-12 xl:p-16">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse 80% 50% at 10% 0%, rgba(15,56,48,0.55), transparent 70%)' }}
+        />
+        <div aria-hidden="true" className="pointer-events-none select-none absolute -bottom-10 inset-x-0 flex justify-center font-serif leading-none text-white/[0.06] text-[20rem] m20-drift-slow">
+          M20
         </div>
 
-        {/* Center Brand Logo */}
-        <div className="text-center mb-6">
-          <Link to="/" className="inline-block transform hover:scale-[1.03] transition-transform duration-200" aria-label="M20 Home">
-            <img 
-              src="/img/m20-logo-emerald.png" 
-              alt="M20 Fine Fragrances" 
-              className="h-10 sm:h-11 w-auto object-contain mx-auto drop-shadow-xs"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = '/img/m20-logo-emerald.png';
-              }}
-            />
-          </Link>
-        </div>
+        <Link to="/" className="relative inline-block w-fit" aria-label="M20 Home">
+          <img
+            src="/img/m20-logo-white.png"
+            alt="M20 Fine Fragrances"
+            className="h-11 w-auto object-contain"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = '/img/m20-logo.png';
+            }}
+          />
+        </Link>
 
-        {/* Premium Container */}
-        <div className={`bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_-12px_rgba(16,62,54,0.12)] border border-slate-200/80 overflow-hidden relative transition-all ${
-          isRTL ? 'text-right' : 'text-left'
-        }`}>
-          
-          {/* Top subtle golden/navy luxury hairline accent */}
-          <div className="h-1 w-full bg-gradient-to-r from-[#174F43] via-[#FF9D00] to-[#174F43]" />
-
-          {/* Elegant Card Header */}
-          <div className="pt-8 pb-6 px-6 sm:px-8 text-center border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/40">
-            <h1 className="text-2xl sm:text-3xl font-serif uppercase tracking-tight text-[#174F43] font-medium leading-snug">
-              {activeTab === 'login' 
-                ? t('auth.welcomeBack', 'Welcome Back')
-                : activeTab === 'register' 
-                ? t('auth.signUpTitle', 'Create Account') 
-                : t('auth.verifyEmailTitle', 'Verify Email')}
-            </h1>
-            
-            <p className="text-xs text-slate-500 font-light mt-1.5 max-w-xs mx-auto leading-relaxed">
-              {activeTab === 'login' 
-                ? t('auth.welcomeBackDesc', 'Sign in to access your orders, wishlist, and bespoke atelier.') 
-                : activeTab === 'register'
-                ? t('auth.createAccountDesc', 'Join M20 for exclusive releases, order tracking, and fast checkout.')
-                : t('auth.verifyEmailDesc', 'Enter the 6-digit confirmation code dispatched to your email.')}
-            </p>
+        <div className="relative space-y-8 text-start">
+          <div className="flex items-center gap-3">
+            <span className="h-[1.5px] w-10 bg-[#FF9D00]" />
+            <span className="text-xs uppercase tracking-[0.3em] text-[#FF9D00] font-semibold">
+              {isRTL ? 'مزايا الأعضاء' : 'MEMBER PRIVILEGES'}
+            </span>
           </div>
-
-          {/* Interactive Modern Tab Switcher */}
-          {activeTab !== 'otp' ? (
-            <div className="p-4 sm:px-8 pb-0">
-              <div className="bg-slate-100/90 p-1 rounded-xl grid grid-cols-2 text-xs font-medium">
-                <button
-                  type="button"
-                  onClick={() => { setActiveTab('login'); setErrorMsg(''); setSuccessMsg(''); }}
-                  className={`py-2.5 rounded-lg transition-all duration-200 uppercase tracking-wider text-[11px] font-semibold flex items-center justify-center ${
-                    activeTab === 'login'
-                      ? 'bg-white text-[#174F43] shadow-sm'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  <span>{t('auth.signInBtn', 'Sign In')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setActiveTab('register'); setErrorMsg(''); setSuccessMsg(''); }}
-                  className={`py-2.5 rounded-lg transition-all duration-200 uppercase tracking-wider text-[11px] font-semibold flex items-center justify-center ${
-                    activeTab === 'register'
-                      ? 'bg-white text-[#174F43] shadow-sm'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  <span>{t('auth.signUpBtn', 'Create Account')}</span>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="px-6 sm:px-8 pt-4">
-              <button
-                type="button"
-                onClick={() => { setActiveTab(otpOriginTab); setOtpDigits(['', '', '', '', '', '']); setErrorMsg(''); setSuccessMsg(''); }}
-                className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#174F43] font-medium transition-colors cursor-pointer"
-              >
-                {isRTL ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
-                <span>
-                  {otpOriginTab === 'register'
-                    ? t('auth.returnToRegistration', 'Return to registration')
-                    : t('auth.returnToSignIn', 'Return to sign in')}
+          <h2 className="text-4xl xl:text-5xl font-serif leading-[1.1] max-w-md">{brandHeading}</h2>
+          <ul className="space-y-4">
+            {benefits.map(({ icon: Icon, text }) => (
+              <li key={text} className="flex items-center gap-3.5 text-white/85 text-base">
+                <span className="w-10 h-10 shrink-0 flex items-center justify-center border border-white/20 text-[#FF9D00]">
+                  <Icon size={18} strokeWidth={1.6} />
                 </span>
+                {text}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="relative text-xs uppercase tracking-[0.3em] text-white/50">{t('common.leaveYourMark', 'Leave your mark.')}</p>
+      </aside>
+
+      {/* ===== Form panel ===== */}
+      <section className="flex items-center justify-center px-5 sm:px-10 py-10 lg:py-16">
+        <div className="w-full max-w-[440px] text-start">
+          {/* Top bar */}
+          <div className="flex items-center justify-between mb-8">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#174F43] transition-colors uppercase tracking-wider font-medium"
+              aria-label={t('auth.returnToBoutique', 'Return to M20 Boutique')}
+            >
+              <BackIcon size={14} />
+              <span>{t('auth.returnToBoutique', 'Return to M20 Boutique')}</span>
+            </Link>
+
+            <div className="flex items-center border border-slate-300 text-xs font-bold">
+              {['en', 'ar'].map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setLang(l)}
+                  className={`px-3 h-8 uppercase transition-colors cursor-pointer ${
+                    lang === l ? 'bg-[#174F43] text-white' : 'text-slate-600 hover:text-black'
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile brand */}
+          <Link to="/" className="lg:hidden block mb-6" aria-label="M20 Home">
+            <img src="/img/m20-logo-emerald.png" alt="M20 Fine Fragrances" className="h-10 w-auto object-contain" />
+          </Link>
+
+          {/* Heading */}
+          <h1 className="text-3xl sm:text-4xl font-serif uppercase text-[#174F43] leading-tight">
+            {activeTab === 'login'
+              ? t('auth.welcomeBack', 'Welcome Back')
+              : activeTab === 'register'
+              ? t('auth.signUpTitle', 'Create Account')
+              : t('auth.verifyEmailTitle', 'Verify Email')}
+          </h1>
+          <p className="text-sm text-slate-500 font-light mt-2 leading-relaxed">
+            {activeTab === 'login'
+              ? t('auth.welcomeBackDesc', 'Sign in to access your orders, wishlist, and bespoke atelier.')
+              : activeTab === 'register'
+              ? t('auth.createAccountDesc', 'Join M20 for exclusive releases, order tracking, and fast checkout.')
+              : t('auth.verifyEmailDesc', 'Enter the 6-digit confirmation code dispatched to your email.')}
+          </p>
+
+          {/* Tabs */}
+          {activeTab !== 'otp' ? (
+            <div className="flex gap-4 mt-8">
+              <button type="button" onClick={() => switchTab('login')} className={tabCls(activeTab === 'login')}>
+                {t('auth.signInBtn', 'Sign In')}
+              </button>
+              <button type="button" onClick={() => switchTab('register')} className={tabCls(activeTab === 'register')}>
+                {t('auth.signUpBtn', 'Create Account')}
               </button>
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => { setActiveTab(otpOriginTab); setOtpDigits(['', '', '', '', '', '']); setErrorMsg(''); setSuccessMsg(''); }}
+              className="mt-6 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#174F43] font-medium transition-colors cursor-pointer"
+            >
+              <BackIcon size={15} />
+              <span>
+                {otpOriginTab === 'register'
+                  ? t('auth.returnToRegistration', 'Return to registration')
+                  : t('auth.returnToSignIn', 'Return to sign in')}
+              </span>
+            </button>
           )}
 
-          {/* Form Content */}
-          <div className="p-6 sm:p-8 pt-5 space-y-4">
-            
-            {/* Semantic Feedback Alerts */}
+          <div className="mt-6 space-y-5">
+            {/* Alerts */}
             {errorMsg && (
-              <div className={`p-3.5 bg-rose-50/90 text-rose-800 border border-rose-200/80 text-xs rounded-xl flex items-start gap-2 animate-fade-in ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <span className="font-semibold shrink-0">•</span>
+              <div role="alert" className="p-3.5 bg-rose-50 text-rose-800 border-s-4 border-rose-500 text-sm flex items-start gap-2">
                 <span className="leading-relaxed">{errorMsg}</span>
               </div>
             )}
             {successMsg && (
-              <div className={`p-3.5 bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 text-xs rounded-xl flex items-center gap-2.5 animate-fade-in ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+              <div role="status" className="p-3.5 bg-emerald-50 text-emerald-800 border-s-4 border-emerald-600 text-sm flex items-center gap-2.5">
+                <CheckCircle2 size={17} className="shrink-0 text-emerald-600" />
                 <span className="leading-relaxed">{successMsg}</span>
               </div>
             )}
 
-            {/* 1. SIGN IN TAB */}
+            {/* 1. SIGN IN */}
             {activeTab === 'login' && (
-              <div className="space-y-4">
-                {/* Sign-In Method Toggle: Email Code (OTP) vs Password */}
-                <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F4F3EF] border border-slate-200/80 rounded-xl text-[11px] font-semibold">
-                  <button
-                    type="button"
-                    onClick={() => { setLoginMethod('otp'); setErrorMsg(''); setSuccessMsg(''); }}
-                    className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      loginMethod === 'otp'
-                        ? 'bg-white text-[#174F43] shadow-xs border border-[#174F43]/15'
-                        : 'text-slate-500 hover:text-[#174F43]'
-                    }`}
-                  >
-                    <Mail size={13} className={loginMethod === 'otp' ? 'text-[#FF9D00]' : ''} />
-                    <span>{t('auth.emailCodeTab', 'Email Code')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setLoginMethod('password'); setErrorMsg(''); setSuccessMsg(''); }}
-                    className={`py-2 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      loginMethod === 'password'
-                        ? 'bg-white text-[#174F43] shadow-xs border border-[#174F43]/15'
-                        : 'text-slate-500 hover:text-[#174F43]'
-                    }`}
-                  >
-                    <Lock size={13} className={loginMethod === 'password' ? 'text-[#FF9D00]' : ''} />
-                    <span>{t('auth.passwordTab', 'Password')}</span>
-                  </button>
+              <div className="space-y-5">
+                <div className="grid grid-cols-2 border border-slate-300 bg-white text-xs font-semibold">
+                  {[
+                    { id: 'otp', icon: Mail, label: t('auth.emailCodeTab', 'Email Code') },
+                    { id: 'password', icon: Lock, label: t('auth.passwordTab', 'Password') },
+                  ].map(({ id, icon: Icon, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => { setLoginMethod(id); setErrorMsg(''); setSuccessMsg(''); }}
+                      className={`h-10 flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+                        loginMethod === id ? 'bg-[#174F43] text-white' : 'text-slate-500 hover:text-[#174F43]'
+                      }`}
+                    >
+                      <Icon size={14} className={loginMethod === id ? 'text-[#FF9D00]' : ''} />
+                      <span>{label}</span>
+                    </button>
+                  ))}
                 </div>
 
                 {loginMethod === 'otp' ? (
-                  <form onSubmit={handleRequestEmailOtpSubmit} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label htmlFor="login-email-otp" className="text-[11px] uppercase tracking-wider text-slate-600 font-semibold block">
-                        {t('auth.email', 'Email Address')}
-                      </label>
-                      <div className="relative flex items-center bg-slate-50/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#174F43]/15 focus-within:border-[#174F43] border border-slate-200 rounded-xl transition-all duration-150">
-                        <Mail size={16} className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-3.5' : 'left-3.5'}`} />
-                        <input
-                          id="login-email-otp"
-                          type="email"
-                          required
-                          value={loginEmailOtp}
-                          onChange={(e) => setLoginEmailOtp(e.target.value)}
-                          placeholder={t('auth.emailPlaceholder', 'name@example.com')}
-                          className={`w-full ${isRTL ? 'pr-10 pl-3.5 text-left' : 'pl-10 pr-3.5'} py-3 text-xs bg-transparent outline-none text-slate-900 placeholder:text-slate-400 font-normal`}
-                          dir="ltr"
-                        />
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-light leading-relaxed pt-0.5">
-                        {t('auth.emailCodeHelper', 'We will email you a 6-digit one-time verification code to sign in securely without a password.')}
-                      </p>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full h-12 bg-[#174F43] text-white text-xs font-semibold uppercase tracking-[0.2em] hover:bg-[#0F3830] active:scale-[0.99] disabled:bg-slate-300 shadow-[0_10px_20px_-5px_rgba(16,62,54,0.25)] hover:shadow-[0_12px_24px_-5px_rgba(16,62,54,0.35)] transition-all duration-200 rounded-xl flex items-center justify-center gap-2 cursor-pointer"
-                    >
+                  <form onSubmit={handleRequestEmailOtpSubmit} className="space-y-5">
+                    <Field
+                      id="login-email-otp"
+                      label={t('auth.email', 'Email Address')}
+                      icon={Mail}
+                      isRTL={isRTL}
+                      ltrInput
+                      type="email"
+                      required
+                      autoComplete="email"
+                      value={loginEmailOtp}
+                      onChange={(e) => setLoginEmailOtp(e.target.value)}
+                      placeholder={t('auth.emailPlaceholder', 'name@example.com')}
+                    />
+                    <p className="text-xs text-slate-500 font-light leading-relaxed -mt-2">
+                      {t('auth.emailCodeHelper', 'We will email you a 6-digit one-time verification code to sign in securely without a password.')}
+                    </p>
+                    <PrimaryButton type="submit" disabled={loading}>
                       <span>{loading ? t('auth.sendingCode', 'Sending code...') : t('auth.sendCodeBtn', 'Send Verification Code')}</span>
-                      {!loading && (isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />)}
-                    </button>
+                      {!loading && <FwdIcon size={15} className="text-[#FF9D00] transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />}
+                    </PrimaryButton>
                   </form>
                 ) : (
-                  <form onSubmit={handleLoginSubmit} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label htmlFor="login-identifier" className="text-[11px] uppercase tracking-wider text-slate-600 font-semibold block">
-                        {t('auth.phoneOrEmail', 'Phone number or email')}
-                      </label>
-                      <div className="relative flex items-center bg-slate-50/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#174F43]/15 focus-within:border-[#174F43] border border-slate-200 rounded-xl transition-all duration-150">
-                        <User size={16} className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-3.5' : 'left-3.5'}`} />
-                        <input
-                          id="login-identifier"
-                          type="text"
-                          required
-                          value={loginIdentifier}
-                          onChange={(e) => setLoginIdentifier(e.target.value)}
-                          placeholder={t('auth.phoneOrEmailPlaceholder', '01132687324 or name@example.com')}
-                          className={`w-full ${isRTL ? 'pr-10 pl-3.5' : 'pl-10 pr-3.5'} py-3 text-xs bg-transparent outline-none text-slate-900 placeholder:text-slate-400 font-normal`}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label htmlFor="login-password" className="text-[11px] uppercase tracking-wider text-slate-600 font-semibold block">
-                        {t('auth.password', 'Password')}
-                      </label>
-                      <div className="relative flex items-center bg-slate-50/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#174F43]/15 focus-within:border-[#174F43] border border-slate-200 rounded-xl transition-all duration-150">
-                        <Lock size={16} className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-3.5' : 'left-3.5'}`} />
-                        <input
-                          id="login-password"
-                          type="password"
-                          required
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          placeholder={t('auth.passwordPlaceholder', 'Enter your password')}
-                          className={`w-full ${isRTL ? 'pr-10 pl-3.5' : 'pl-10 pr-3.5'} py-3 text-xs bg-transparent outline-none text-slate-900 placeholder:text-slate-400 font-normal`}
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full h-12 bg-[#174F43] text-white text-xs font-semibold uppercase tracking-[0.2em] hover:bg-[#0F3830] active:scale-[0.99] disabled:bg-slate-300 shadow-[0_10px_20px_-5px_rgba(16,62,54,0.25)] hover:shadow-[0_12px_24px_-5px_rgba(16,62,54,0.35)] transition-all duration-200 rounded-xl flex items-center justify-center gap-2 mt-2 cursor-pointer"
-                    >
+                  <form onSubmit={handleLoginSubmit} className="space-y-5">
+                    <Field
+                      id="login-identifier"
+                      label={t('auth.phoneOrEmail', 'Phone number or email')}
+                      icon={User}
+                      isRTL={isRTL}
+                      type="text"
+                      required
+                      autoComplete="username"
+                      value={loginIdentifier}
+                      onChange={(e) => setLoginIdentifier(e.target.value)}
+                      placeholder={t('auth.phoneOrEmailPlaceholder', '01132687324 or name@example.com')}
+                    />
+                    <Field
+                      id="login-password"
+                      label={t('auth.password', 'Password')}
+                      icon={Lock}
+                      isRTL={isRTL}
+                      right={passwordToggle}
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      autoComplete="current-password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder={t('auth.passwordPlaceholder', 'Enter your password')}
+                    />
+                    <PrimaryButton type="submit" disabled={loading}>
                       <span>{loading ? t('auth.authenticating', 'Authenticating...') : t('auth.signInBtn', 'Sign In')}</span>
-                      {!loading && (isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />)}
-                    </button>
+                      {!loading && <FwdIcon size={15} className="text-[#FF9D00] transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />}
+                    </PrimaryButton>
                   </form>
                 )}
 
-                <div className="pt-2 text-center text-xs text-slate-500 font-light">
-                  <span>{t('auth.noAccount', "Don't have an account?")} </span>
-                  <button
-                    type="button"
-                    onClick={() => { setActiveTab('register'); setErrorMsg(''); setSuccessMsg(''); }}
-                    className="text-[#174F43] font-semibold hover:underline cursor-pointer inline-block mx-1"
-                  >
+                <p className="text-center text-sm text-slate-500 font-light">
+                  {t('auth.noAccount', "Don't have an account?")}{' '}
+                  <button type="button" onClick={() => switchTab('register')} className="text-[#174F43] font-semibold hover:underline cursor-pointer">
                     {t('auth.createOneNow', 'Create one now')}
                   </button>
-                </div>
+                </p>
               </div>
             )}
 
-            {/* 2. CREATE ACCOUNT TAB */}
+            {/* 2. CREATE ACCOUNT */}
             {activeTab === 'register' && (
-              <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
-                <div className="space-y-1.5">
-                  <label htmlFor="reg-name" className="text-[11px] uppercase tracking-wider text-slate-600 font-semibold block">
-                    {t('auth.fullName', 'Full name')}
-                  </label>
-                  <div className="relative flex items-center bg-slate-50/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#174F43]/15 focus-within:border-[#174F43] border border-slate-200 rounded-xl transition-all duration-150">
-                    <User size={16} className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-3.5' : 'left-3.5'}`} />
-                    <input
-                      id="reg-name"
-                      type="text"
-                      required
-                      value={regName}
-                      onChange={(e) => setRegName(e.target.value)}
-                      placeholder={t('auth.fullNamePlaceholder', 'e.g. Karim Ahmed')}
-                      className={`w-full ${isRTL ? 'pr-10 pl-3.5' : 'pl-10 pr-3.5'} py-3 text-xs bg-transparent outline-none text-slate-900 placeholder:text-slate-400`}
-                    />
-                  </div>
+              <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                <Field
+                  id="reg-name"
+                  label={t('auth.fullName', 'Full name')}
+                  icon={User}
+                  isRTL={isRTL}
+                  type="text"
+                  required
+                  autoComplete="name"
+                  value={regName}
+                  onChange={(e) => setRegName(e.target.value)}
+                  placeholder={t('auth.fullNamePlaceholder', 'e.g. Karim Ahmed')}
+                />
+                <Field
+                  id="reg-phone"
+                  label={t('auth.phone', 'Phone number')}
+                  icon={Phone}
+                  isRTL={isRTL}
+                  ltrInput
+                  type="tel"
+                  required
+                  autoComplete="tel"
+                  value={regPhone}
+                  onChange={(e) => setRegPhone(e.target.value)}
+                  placeholder={t('auth.phonePlaceholder', '01xxxxxxxxx')}
+                />
+                <Field
+                  id="reg-email"
+                  label={t('auth.email', 'Email address')}
+                  icon={Mail}
+                  isRTL={isRTL}
+                  ltrInput
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={regEmail}
+                  onChange={(e) => setRegEmail(e.target.value)}
+                  placeholder={t('auth.emailPlaceholder', 'name@example.com')}
+                />
+                <Field
+                  id="reg-password"
+                  label={t('auth.password', 'Password')}
+                  icon={Lock}
+                  isRTL={isRTL}
+                  right={passwordToggle}
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={4}
+                  autoComplete="new-password"
+                  value={regPassword}
+                  onChange={(e) => setRegPassword(e.target.value)}
+                  placeholder={t('auth.regPasswordPlaceholder', 'Minimum 4 characters')}
+                />
+                <div className="pt-1">
+                  <PrimaryButton type="submit" disabled={loading}>
+                    <span>{loading ? t('auth.sendingCode', 'Sending code...') : t('auth.continueToVerification', 'Continue to Verification')}</span>
+                    {!loading && <FwdIcon size={15} className="text-[#FF9D00] transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />}
+                  </PrimaryButton>
                 </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="reg-phone" className="text-[11px] uppercase tracking-wider text-slate-600 font-semibold block">
-                    {t('auth.phone', 'Phone number')}
-                  </label>
-                  <div className="relative flex items-center bg-slate-50/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#174F43]/15 focus-within:border-[#174F43] border border-slate-200 rounded-xl transition-all duration-150">
-                    <Phone size={16} className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-3.5' : 'left-3.5'}`} />
-                    <input
-                      id="reg-phone"
-                      type="tel"
-                      required
-                      value={regPhone}
-                      onChange={(e) => setRegPhone(e.target.value)}
-                      placeholder={t('auth.phonePlaceholder', '01xxxxxxxxx')}
-                      className={`w-full ${isRTL ? 'pr-10 pl-3.5' : 'pl-10 pr-3.5'} py-3 text-xs bg-transparent outline-none text-slate-900 placeholder:text-slate-400 font-mono`}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="reg-email" className="text-[11px] uppercase tracking-wider text-slate-600 font-semibold block">
-                    {t('auth.email', 'Email address')}
-                  </label>
-                  <div className="relative flex items-center bg-slate-50/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#174F43]/15 focus-within:border-[#174F43] border border-slate-200 rounded-xl transition-all duration-150">
-                    <Mail size={16} className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-3.5' : 'left-3.5'}`} />
-                    <input
-                      id="reg-email"
-                      type="email"
-                      required
-                      dir="ltr"
-                      value={regEmail}
-                      onChange={(e) => setRegEmail(e.target.value)}
-                      placeholder={t('auth.emailPlaceholder', 'name@example.com')}
-                      className={`w-full ${isRTL ? 'pr-10 pl-3.5 text-left' : 'pl-10 pr-3.5'} py-3 text-xs bg-transparent outline-none text-slate-900 placeholder:text-slate-400`}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="reg-password" className="text-[11px] uppercase tracking-wider text-slate-600 font-semibold block">
-                    {t('auth.password', 'Password')}
-                  </label>
-                  <div className="relative flex items-center bg-slate-50/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#174F43]/15 focus-within:border-[#174F43] border border-slate-200 rounded-xl transition-all duration-150">
-                    <Lock size={16} className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-3.5' : 'left-3.5'}`} />
-                    <input
-                      id="reg-password"
-                      type="password"
-                      required
-                      minLength={4}
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      placeholder={t('auth.regPasswordPlaceholder', 'Minimum 4 characters')}
-                      className={`w-full ${isRTL ? 'pr-10 pl-3.5' : 'pl-10 pr-3.5'} py-3 text-xs bg-transparent outline-none text-slate-900 placeholder:text-slate-400`}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-12 bg-[#174F43] text-white text-xs font-semibold uppercase tracking-[0.2em] hover:bg-[#0F3830] active:scale-[0.99] disabled:bg-slate-300 shadow-[0_10px_20px_-5px_rgba(16,62,54,0.25)] hover:shadow-[0_12px_24px_-5px_rgba(16,62,54,0.35)] transition-all duration-200 rounded-xl flex items-center justify-center gap-2 mt-2 cursor-pointer"
-                >
-                  <span>{loading ? t('auth.sendingCode', 'Sending code...') : t('auth.continueToVerification', 'Continue to Verification')}</span>
-                  {!loading && (isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />)}
-                </button>
-
-                <div className="pt-2 text-center text-xs text-slate-500 font-light">
-                  <span>{t('auth.haveAccount', 'Already registered?')} </span>
-                  <button
-                    type="button"
-                    onClick={() => { setActiveTab('login'); setErrorMsg(''); setSuccessMsg(''); }}
-                    className="text-[#174F43] font-semibold hover:underline cursor-pointer inline-block mx-1"
-                  >
+                <p className="text-center text-sm text-slate-500 font-light">
+                  {t('auth.haveAccount', 'Already registered?')}{' '}
+                  <button type="button" onClick={() => switchTab('login')} className="text-[#174F43] font-semibold hover:underline cursor-pointer">
                     {t('auth.signInLink', 'Sign in')}
                   </button>
-                </div>
+                </p>
               </form>
             )}
 
-            {/* 3. OTP VERIFICATION STEP */}
+            {/* 3. OTP */}
             {activeTab === 'otp' && (
-              <div className="space-y-6 text-center">
-                <div className="w-12 h-12 bg-[#174F43]/5 text-[#174F43] rounded-2xl flex items-center justify-center mx-auto ring-1 ring-[#174F43]/10">
-                  <KeyRound size={22} />
-                </div>
-
-                <div className="space-y-1">
-                  <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-800 font-serif">
-                    {t('auth.enterOtp', 'Enter Verification Code')}
-                  </h2>
-                  <p className="text-xs text-slate-500 font-light leading-relaxed">
-                    {t('auth.otpDesc', 'A 6-digit code was sent to')} <br />
-                    <strong className="text-slate-900 font-medium dir-ltr inline-block mt-0.5">{pendingEmail || regEmail || loginEmailOtp}</strong>
-                  </p>
-                  <p className="text-[11px] text-slate-400 font-light leading-relaxed max-w-xs mx-auto">
-                    {t('auth.checkSpamHint', 'If you do not see the email in your Primary Inbox, please check your Spam or Updates folder.')}
-                  </p>
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 shrink-0 bg-[#174F43] text-[#FF9D00] flex items-center justify-center">
+                    <KeyRound size={22} />
+                  </div>
+                  <div className="space-y-1">
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-800">
+                      {t('auth.enterOtp', 'Enter Verification Code')}
+                    </h2>
+                    <p className="text-sm text-slate-500 font-light leading-relaxed">
+                      {t('auth.otpDesc', 'A 6-digit code was sent to')}{' '}
+                      <strong dir="ltr" className="text-slate-900 font-medium inline-block">{pendingEmail || regEmail || loginEmailOtp}</strong>
+                    </p>
+                    <p className="text-xs text-slate-400 font-light leading-relaxed">
+                      {t('auth.checkSpamHint', 'If you do not see the email in your Primary Inbox, please check your Spam or Updates folder.')}
+                    </p>
+                  </div>
                 </div>
 
                 <form onSubmit={handleOtpSubmit} className="space-y-5">
-                  <div className="flex justify-center gap-2 sm:gap-2.5 dir-ltr" dir="ltr">
+                  <div className="flex justify-center gap-2 sm:gap-2.5" dir="ltr">
                     {otpDigits.map((digit, idx) => (
                       <input
                         key={idx}
@@ -717,38 +714,32 @@ const LoginPage = () => {
                         onChange={(e) => handleOtpChange(idx, e.target.value)}
                         onPaste={handleOtpPaste}
                         onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                        className="w-11 sm:w-12 h-13 text-center font-mono text-xl font-bold text-[#174F43] bg-slate-50/90 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#174F43]/20 focus:border-[#174F43] outline-none transition-all duration-150"
+                        className="w-11 sm:w-[52px] h-14 text-center font-mono text-2xl font-bold text-[#174F43] bg-white border border-slate-300 focus:border-[#174F43] focus:ring-1 focus:ring-[#174F43] outline-none transition-colors"
                         autoFocus={idx === 0}
                         aria-label={`Digit ${idx + 1}`}
                       />
                     ))}
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={loading || otpDigits.join('').length < 6}
-                    className="w-full h-12 bg-[#174F43] text-white text-xs font-semibold uppercase tracking-[0.2em] hover:bg-[#0F3830] active:scale-[0.99] disabled:bg-slate-300 shadow-[0_10px_20px_-5px_rgba(16,62,54,0.25)] transition-all duration-200 rounded-xl flex items-center justify-center cursor-pointer"
-                  >
+                  <PrimaryButton type="submit" disabled={loading || otpDigits.join('').length < 6}>
                     {loading ? t('auth.verifying', 'Verifying...') : t('auth.verifyBtn', 'Confirm & Complete')}
-                  </button>
+                  </PrimaryButton>
                 </form>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-light">
+                <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-sm text-slate-500 font-light">
                   <span>{t('auth.didNotReceiveEmail', 'Did not receive email?')}</span>
                   <button
                     type="button"
                     onClick={handleResendOtp}
                     disabled={!canResend || resending}
-                    className={`font-medium inline-flex items-center gap-1 uppercase text-xs tracking-wider transition-colors duration-150 ${
-                      canResend && !resending
-                        ? 'text-[#174F43] hover:underline font-semibold cursor-pointer' 
-                        : 'text-slate-400 cursor-not-allowed'
+                    className={`inline-flex items-center gap-1.5 uppercase text-xs tracking-wider font-medium transition-colors ${
+                      canResend && !resending ? 'text-[#174F43] hover:underline font-semibold cursor-pointer' : 'text-slate-400 cursor-not-allowed'
                     }`}
                   >
-                    <RefreshCw size={12} className={resending ? 'animate-spin' : ''} />
+                    <RefreshCw size={13} className={resending ? 'animate-spin' : ''} />
                     <span>
-                      {canResend 
-                        ? t('auth.resendOtp', 'Resend code') 
+                      {canResend
+                        ? t('auth.resendOtp', 'Resend code')
                         : (isRTL ? `إعادة الإرسال بعد ${resendTimer} ثانية` : `Resend in ${resendTimer}s`)}
                     </span>
                   </button>
@@ -756,19 +747,15 @@ const LoginPage = () => {
               </div>
             )}
 
-            {/* Registration Guarantee */}
             {activeTab !== 'otp' && (
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-light">
-                <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
+              <div className="pt-5 border-t border-slate-200 flex items-center justify-center gap-2 text-xs text-slate-400 font-light">
+                <ShieldCheck size={15} className="text-emerald-600 shrink-0" />
                 <span>{t('auth.secureAuth', '256-bit Encrypted & Secure Authentication')}</span>
               </div>
             )}
-
           </div>
-
         </div>
-
-      </div>
+      </section>
     </main>
   );
 };

@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { getProductPriceSummary } from '../utils/productPricing';
 import { ShoppingBag } from 'lucide-react';
 import { trackAddToCart } from '../utils/tracking';
+import Tilt3D from './Tilt3D';
 
 const ProductCard = ({ product: rawProduct }) => {
   const { addToCart } = useCart();
@@ -70,9 +71,10 @@ const ProductCard = ({ product: rawProduct }) => {
     >
       <div className="flex flex-col">
         {/* Product image container - Pure, minimal, seamless, no borders, frames, or shadows */}
+        <Tilt3D className="mb-3" max={7}>
         <Link
           to={`/product/${productId}`}
-          className="relative block w-full aspect-square overflow-hidden mb-3 bg-transparent select-none cursor-pointer"
+          className="relative block w-full aspect-square overflow-hidden bg-transparent select-none cursor-pointer"
           aria-label={`View details for ${product.name}`}
           onTouchStart={() => setTouchActive(true)}
           onTouchEnd={() => setTimeout(() => setTouchActive(false), 2500)}
@@ -109,6 +111,7 @@ const ProductCard = ({ product: rawProduct }) => {
             )}
           </div>
         </Link>
+        </Tilt3D>
 
         {/* Product Name */}
         <h3 className="text-sm sm:text-base font-serif text-[#174F43] tracking-wide uppercase font-medium leading-snug mb-1">

@@ -4,8 +4,7 @@ import { getProductById, getProducts } from '../services/api';
 import { getFallbackProductById } from '../data/fallbackCatalog';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
-import { sortVariantsBySize } from '../utils/productPricing';
-import ProductCard from '../components/ProductCard';
+import { sortVariantsBySize, getProductPriceSummary } from '../utils/productPricing';
 import SEO from '../components/SEO';
 import SEOHead from '../components/SEOHead';
 import { trackViewContent, trackAddToCart } from '../utils/tracking';
@@ -244,6 +243,19 @@ const ProductDetailPage = () => {
 
   const mainImage = gallery.find((img) => img.url === selectedImageUrl) || gallery[0] || null;
 
+  // Track ViewContent on Product Details Load (must stay above the early returns below: Rules of Hooks)
+  useEffect(() => {
+    if (rawProduct) {
+      trackViewContent({
+        id: rawProduct._id || rawProduct.id || id,
+        name: rawProduct.name,
+        price: selectedVariant?.price || rawProduct.price || 0,
+        size: selectedVariant?.size || '50ml',
+        category: rawProduct.category || 'Fragrance'
+      });
+    }
+  }, [rawProduct?._id, rawProduct?.id]);
+
   if (loading) {
     return (
       <div className="min-h-[65vh] flex flex-col items-center justify-center space-y-3 bg-[#F4F3EF]">
@@ -277,19 +289,6 @@ const ProductDetailPage = () => {
   const price = selectedVariant?.price || product.price || 0;
   const oldPrice = selectedVariant?.compareAtPrice || selectedVariant?.oldPrice;
   const hasDiscount = oldPrice && Number(oldPrice) > Number(price);
-
-  // Track ViewContent on Product Details Load
-  useEffect(() => {
-    if (rawProduct) {
-      trackViewContent({
-        id: rawProduct._id || rawProduct.id || id,
-        name: rawProduct.name,
-        price: selectedVariant?.price || rawProduct.price || 0,
-        size: selectedVariant?.size || '50ml',
-        category: rawProduct.category || 'Fragrance'
-      });
-    }
-  }, [rawProduct?._id, rawProduct?.id]);
 
   const handleAddToCart = () => {
     addToCart(product, selectedVariant, quantity);
@@ -371,6 +370,23 @@ const ProductDetailPage = () => {
     },
   };
 
+  const discountPct = hasDiscount ? Math.round((1 - Number(price) / Number(oldPrice)) * 100) : 0;
+  const total = Number(price) * quantity;
+
+  const meter = (val, max) => {
+    const n = parseFloat(String(val).replace(/[^\d.]/g, ''));
+    return Number.isFinite(n) ? Math.min(100, Math.round((n / max) * 100)) : 60;
+  };
+
+  const notesSrc = product.fragranceNotes || product.notes || {};
+  const noteRows = [
+    { key: 'top', label: lang === 'ar' ? 'النوتات العليا' : 'TOP', items: notesSrc.top },
+    { key: 'heart', label: lang === 'ar' ? 'القلب' : 'HEART', items: notesSrc.heart },
+    { key: 'base', label: lang === 'ar' ? 'القاعدة' : 'BASE', items: notesSrc.base },
+  ].filter((r) => Array.isArray(r.items) && r.items.length > 0);
+
+  const Crumb = isRTL ? ChevronLeft : ChevronRight;
+
   return (
     <div className="bg-[#F4F3EF] selection:bg-[#174F43] selection:text-white">
       <SEOHead
@@ -383,51 +399,60 @@ const ProductDetailPage = () => {
         canonicalUrl={typeof window !== 'undefined' ? window.location.href.split('?')[0] : undefined}
       />
 
-      {/* Top Breadcrumbs */}
-      <div className="border-b border-slate-200/70 bg-[#ECEAE3]/60">
-        <div className="max-w-[1200px] mx-auto px-6 py-3.5">
-          <nav className={`text-[11px] tracking-[0.15em] uppercase text-slate-500 flex items-center flex-wrap gap-1.5 ${isRTL ? 'text-right' : 'text-left'} font-light`}>
+      {/* Breadcrumbs */}
+      <div className="border-b border-slate-200/70">
+        <div className="max-w-[1280px] mx-auto px-6 py-3.5">
+          <nav className="text-xs tracking-[0.15em] uppercase text-slate-500 flex items-center flex-wrap gap-1.5 font-light">
             <Link to="/" className="hover:text-[#174F43] transition-colors">{t('productDetail.breadcrumbHome', 'Home')}</Link>
-            {isRTL ? <ChevronLeft size={12} className="text-slate-400" /> : <ChevronRight size={12} className="text-slate-400" />}
+            <Crumb size={12} className="text-slate-400" />
             <Link to="/shop" className="hover:text-[#174F43] transition-colors">{t('productDetail.breadcrumbShop', 'Catalog')}</Link>
-            {isRTL ? <ChevronLeft size={12} className="text-slate-400" /> : <ChevronRight size={12} className="text-slate-400" />}
-            <Link to={rawGenderUpper === 'WOMEN' ? '/women' : '/men'} className="hover:text-[#174F43] transition-colors">
-              {genderDisplay}
-            </Link>
-            {isRTL ? <ChevronLeft size={12} className="text-slate-400" /> : <ChevronRight size={12} className="text-slate-400" />}
+            <Crumb size={12} className="text-slate-400" />
+            <Link to={rawGenderUpper === 'WOMEN' ? '/women' : '/men'} className="hover:text-[#174F43] transition-colors">{genderDisplay}</Link>
+            <Crumb size={12} className="text-slate-400" />
             <span className="text-[#174F43] font-medium">{product.name}</span>
           </nav>
         </div>
       </div>
 
-      {/* Main Product Presentation */}
-      <div className="max-w-[1200px] mx-auto px-6 py-10 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+      <div className="max-w-[1280px] mx-auto px-6 py-8 md:py-14">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
 
-          {/* LEFT: Gallery (7 Cols) */}
-          <div className="lg:col-span-7 flex flex-col-reverse sm:flex-row gap-4">
+          {/* ===== Gallery (sticky on desktop) ===== */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="relative aspect-square bg-[#E9E8E6] overflow-hidden">
+              <span className="absolute top-4 start-4 z-10 bg-[#174F43] text-white text-xs font-semibold tracking-[0.2em] uppercase px-3 py-1.5">
+                {mainImage?.label || product.fragranceFamily || t('productDetail.concentration', 'Extrait de Parfum')}
+              </span>
+              {discountPct > 0 && (
+                <span className="absolute top-4 end-4 z-10 bg-[#FF9D00] text-[#0F3830] text-sm font-bold px-3 py-1.5" dir="ltr">
+                  -{discountPct}%
+                </span>
+              )}
+              <img
+                src={mainImage?.url || productImg}
+                alt={mainImage?.alt || product.name}
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/img/product.png';
+                }}
+              />
+            </div>
 
-            {/* Thumbnails Sidebar */}
             {gallery.length > 1 && (
-              <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto max-h-[520px] pb-2 sm:pb-0 scrollbar-thin">
-                {gallery.map((img, idx) => (
+              <div className="grid grid-cols-4 gap-3">
+                {gallery.slice(0, 8).map((img, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => setSelectedImageUrl(img.url)}
-                    className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 border bg-[#FAF9F6] transition-all duration-150 rounded-sm p-1.5 flex flex-col items-center justify-between cursor-pointer ${
-                      mainImage?.url === img.url
-                        ? 'border-[#174F43] ring-1 ring-[#174F43]'
-                        : 'border-slate-200 hover:border-slate-400'
+                    className={`relative aspect-square bg-[#E9E8E6] border-2 transition-colors cursor-pointer overflow-hidden ${
+                      mainImage?.url === img.url ? 'border-[#174F43]' : 'border-transparent hover:border-slate-400'
                     }`}
                     aria-label={`Select ${img.label || 'product image'}`}
                   >
-                    <img
-                      src={img.url}
-                      alt={img.alt || `${product.name} thumbnail ${idx + 1}`}
-                      className="w-full h-11 sm:h-13 object-contain mix-blend-multiply"
-                    />
-                    <span className="text-[9px] uppercase tracking-wider text-slate-500 font-medium truncate block max-w-full">
+                    <img src={img.url} alt={img.alt || `${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                    <span className="absolute inset-x-0 bottom-0 bg-white/90 text-[10px] uppercase tracking-wider text-slate-600 py-0.5 text-center truncate">
                       {img.label}
                     </span>
                   </button>
@@ -435,265 +460,9 @@ const ProductDetailPage = () => {
               </div>
             )}
 
-            {/* Primary Image Viewer */}
-            <div className="relative flex-1 aspect-square bg-[#ECEAE3]/55 border border-slate-200/80 rounded-sm flex items-center justify-center p-8 sm:p-12 overflow-hidden">
-              <span className={`absolute top-4 ${isRTL ? 'right-4' : 'left-4'} text-[10px] uppercase tracking-[0.2em] font-medium text-slate-500 bg-[#F4F3EF]/90 px-2.5 py-1 rounded-sm border border-slate-200/80`}>
-                {mainImage?.label || product.fragranceFamily || t('productDetail.concentration', 'Extrait de Parfum')}
-              </span>
-
-              <img
-                src={mainImage?.url || productImg}
-                alt={mainImage?.alt || product.name}
-                className="w-full h-full object-contain mix-blend-multiply"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/img/product.png';
-                }}
-              />
-            </div>
-          </div>
-
-          {/* RIGHT: Product Information & Purchase Area (5 Cols) */}
-          <div className={`lg:col-span-5 flex flex-col ${isRTL ? 'text-right' : 'text-left'} space-y-6`}>
-
-            {/* Header: Subtitle, Title, Price */}
-            <div className="space-y-2 border-b border-slate-200/80 pb-5">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-[11px] uppercase tracking-[0.2em] text-[#174F43] font-bold block">
-                  {lang === 'ar'
-                    ? `دار M20 • ${genderDisplay}`
-                    : `M20 ATELIER • ${genderDisplay} ${t('productDetail.collectionSuffix', 'COLLECTION')}`}
-                </span>
-                <span className={`text-[10px] uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-sm bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'}`}>
-                  <CheckCircle2 size={11} className={isRTL ? 'ml-1' : 'mr-1'} />
-                  <span>{t('productDetail.inStock', 'IN STOCK')}</span>
-                </span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl font-serif uppercase text-[#174F43] tracking-tight leading-tight">
-                {product.name}
-              </h1>
-
-              {/* Price & Currency */}
-              <div className={`pt-2 flex items-baseline flex-wrap gap-x-3 gap-y-1`}>
-                {hasDiscount && (
-                  <span className="text-lg sm:text-xl font-serif text-slate-400 line-through font-light">
-                    {formatPrice(oldPrice)}
-                  </span>
-                )}
-                <span className="text-2xl sm:text-3xl font-serif font-semibold text-[#174F43]">
-                  {formatPrice(price)}
-                </span>
-                <span className="text-xs text-slate-500 font-light">
-                  {t('productDetail.taxesIncluded', 'Taxes & luxury packaging included')}
-                </span>
-              </div>
-            </div>
-
-            {/* Product Description */}
-            {(fullDesc || shortDesc) && (
-              <div className="space-y-2">
-                {showBothDescriptions ? (
-                  <>
-                    <p className="text-xs sm:text-sm text-[#174F43]/90 font-medium leading-relaxed">
-                      {shortDesc}
-                    </p>
-                    <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
-                      {fullDesc}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
-                    {fullDesc || shortDesc}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Longevity & Sillage (الثبات والفوحان) */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className={`bg-[#FAF9F6] border border-slate-200/90 p-3.5 rounded-sm flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-                <div className="w-10 h-10 rounded-full bg-[#F4F3EF] border border-slate-200 flex items-center justify-center shrink-0 text-[#174F43]">
-                  <Clock size={18} strokeWidth={1.75} />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-slate-500 block leading-none">
-                    {t('productDetail.longevity', 'Longevity')}
-                  </span>
-                  <div className={`mt-1.5 flex items-baseline gap-1`}>
-                    <span className="text-lg font-serif font-bold text-[#174F43] leading-tight">
-                      {longevityVal}
-                    </span>
-                    <span className="text-xs text-slate-500 font-light">
-                      {String(longevityVal).toLowerCase().includes('hour') ? '' : t('productDetail.hours', 'Hours')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`bg-[#FAF9F6] border border-slate-200/90 p-3.5 rounded-sm flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-                <div className="w-10 h-10 rounded-full bg-[#F4F3EF] border border-slate-200 flex items-center justify-center shrink-0 text-[#174F43]">
-                  <Wind size={18} strokeWidth={1.75} />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-slate-500 block leading-none">
-                    {t('productDetail.sillage', 'Sillage')}
-                  </span>
-                  <div className={`mt-1.5 flex items-baseline gap-1`}>
-                    <span className="text-lg font-serif font-bold text-[#174F43] leading-tight">
-                      {projectionVal}
-                    </span>
-                    <span className="text-xs text-slate-500 font-light">
-                      {String(projectionVal).toLowerCase().includes('hour') ? '' : t('productDetail.hours', 'Hours')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Best For / Occasions */}
-            {occasionsList.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-semibold block">
-                  {t('productDetail.bestFor', 'Best For')}
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {occasionsList.map((occ) => {
-                    const meta = getOccasionMeta(occ, lang);
-                    const OccIcon = meta.icon;
-                    return (
-                      <span
-                        key={occ}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#FAF9F6] border border-slate-200/90 rounded-sm text-xs text-[#174F43] font-medium"
-                      >
-                        <OccIcon size={13} strokeWidth={1.6} className="text-[#174F43]/80" />
-                        <span>{meta.label}</span>
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Flacon Size Selection */}
-            {sortedVariants.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="uppercase tracking-widest text-slate-600 font-semibold">{t('productDetail.size', 'Select Size')}</span>
-                  <span className="text-slate-500 font-light text-[11px]">{selectedVariant?.size}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {sortedVariants.map((variant) => {
-                    const isSelected = selectedVariant?._id === variant._id || selectedVariant?.size === variant.size;
-                    const vPrice = variant.price;
-                    const vOldPrice = variant.compareAtPrice || variant.oldPrice;
-                    const vHasDiscount = vOldPrice && Number(vOldPrice) > Number(vPrice);
-
-                    return (
-                      <button
-                        key={variant._id || variant.size}
-                        type="button"
-                        onClick={() => setSelectedVariant(variant)}
-                        className={`p-3 text-xs tracking-wider uppercase transition-all duration-150 rounded-sm text-center border flex flex-col items-center justify-center cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#174F43] text-white border-[#174F43]'
-                            : 'bg-[#FAF9F6] text-slate-700 border-slate-200 hover:border-slate-400'
-                        }`}
-                      >
-                        <span className="font-bold text-xs">{variant.size}</span>
-                        <div className="mt-1 flex flex-col items-center">
-                          {vHasDiscount && (
-                            <span className={`text-[10px] line-through font-light ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
-                              {formatPrice(vOldPrice)}
-                            </span>
-                          )}
-                          <span className={`text-[11px] font-semibold ${isSelected ? 'text-white' : 'text-[#174F43]'}`}>
-                            {formatPrice(vPrice)}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Quantity Selector & Action Buttons */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-3">
-                {/* Quantity Box */}
-                <div className="flex items-center border border-slate-300 h-12 w-32 shrink-0 rounded-sm bg-[#FAF9F6]">
-                  <button
-                    type="button"
-                    onClick={() => handleQuantityChange(-1)}
-                    className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-[#174F43] transition-colors cursor-pointer"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus size={14} strokeWidth={1.5} />
-                  </button>
-                  <div className="flex-1 text-center text-xs font-semibold text-[#174F43]">
-                    {quantity}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleQuantityChange(1)}
-                    className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-[#174F43] transition-colors cursor-pointer"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={14} strokeWidth={1.5} />
-                  </button>
-                </div>
-
-                {/* Add to Cart CTA */}
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  className={`flex-1 h-12 px-6 text-xs font-semibold tracking-[0.2em] uppercase transition-all duration-150 rounded-sm flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} cursor-pointer ${
-                    addedAnimation
-                      ? 'bg-emerald-700 text-white'
-                      : 'bg-[#174F43] text-white hover:bg-[#0F3830]'
-                  }`}
-                >
-                  {addedAnimation ? (
-                    <>
-                      <Check size={16} />
-                      <span>{t('productDetail.addedToCart', 'ADDED TO BAG')}</span>
-                    </>
-                  ) : (
-                    <span>{t('productDetail.addToCart', 'ADD TO SHOPPING BAG')}</span>
-                  )}
-                </button>
-              </div>
-
-              {/* Express Buy Now Button */}
-              <button
-                type="button"
-                onClick={handleBuyNow}
-                className="w-full h-11 border border-[#174F43] text-[#174F43] text-xs font-semibold tracking-[0.2em] uppercase hover:bg-[#174F43]/5 transition-colors duration-150 rounded-sm cursor-pointer"
-              >
-                {lang === 'ar' ? 'شراء فوري بضغطة واحدة' : 'BUY NOW WITH 1-CLICK'}
-              </button>
-            </div>
-
-            {/* Maison Guarantees Strip */}
-            <div className="pt-4 border-t border-slate-200/80 space-y-2.5 text-xs text-slate-600 font-light">
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2.5' : 'space-x-2.5'}`}>
-                <Truck size={15} className="text-[#174F43] flex-shrink-0" />
-                <span>{t('features.f4Desc', 'Express delivery across Egypt (2 to 4 business days)')}</span>
-              </div>
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2.5' : 'space-x-2.5'}`}>
-                <ShieldCheck size={15} className="text-[#174F43] flex-shrink-0" />
-                <span>{t('productDetail.authenticGuarantee', '100% Authentic Maison Formulation • Extrait de Parfum')}</span>
-              </div>
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2.5' : 'space-x-2.5'}`}>
-                <RotateCcw size={15} className="text-[#174F43] flex-shrink-0" />
-                <span>{t('productDetail.parcelInspection', 'Guaranteed parcel inspection upon delivery')}</span>
-              </div>
-            </div>
-
-            {/* Collapsible Dropdown Accordions */}
-            <div className="pt-2 border-t border-slate-200/80">
-              <AccordionItem title={t('productDetail.craftsmanshipTitle', 'Maison Specifications & Details')} icon={Layers} defaultOpen={true} isRTL={isRTL}>
+            {/* Details accordions */}
+            <div className="border-t border-slate-200">
+              <AccordionItem title={t('productDetail.craftsmanshipTitle', 'Maison Specifications & Details')} icon={Layers} defaultOpen={Boolean(fullDesc && showBothDescriptions)} isRTL={isRTL}>
                 <div className="space-y-2">
                   <p>
                     {fullDesc || (lang === 'ar'
@@ -706,40 +475,257 @@ const ProductDetailPage = () => {
                   </ul>
                 </div>
               </AccordionItem>
-
               <AccordionItem title={t('productDetail.applicationTitle', 'Application & Sillage Ritual')} icon={Droplets} isRTL={isRTL}>
-                <p>
-                  {t('productDetail.applicationText', 'Spray at pulse points, wrists, neck, and behind the ears, for rich, enduring sillage throughout the day.')}
-                </p>
+                <p>{t('productDetail.applicationText', 'Spray at pulse points, wrists, neck, and behind the ears, for rich, enduring sillage throughout the day.')}</p>
               </AccordionItem>
-
               <AccordionItem title={t('productDetail.shippingReturnsTitle', 'Shipping & Authentic Guarantee')} icon={Truck} isRTL={isRTL}>
-                <p>
-                  {t('productDetail.shippingText', 'Delivered in 2-4 business days across Egypt. Metro pickup available for Cairo & Giza. 14-day return privilege on sealed items.')}
-                </p>
+                <p>{t('productDetail.shippingText', 'Delivered in 2-4 business days across Egypt. Metro pickup available for Cairo & Giza. 14-day return privilege on sealed items.')}</p>
               </AccordionItem>
             </div>
+          </div>
 
+          {/* ===== Purchase panel ===== */}
+          <div className="lg:col-span-5 flex flex-col gap-7 text-start">
+
+            {/* Title block */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-xs uppercase tracking-[0.22em] text-[#FF9D00] font-bold">
+                  {lang === 'ar'
+                    ? `دار M20 • ${genderDisplay}`
+                    : `M20 ATELIER • ${genderDisplay} ${t('productDetail.collectionSuffix', 'COLLECTION')}`}
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <CheckCircle2 size={13} />
+                  {t('productDetail.inStock', 'IN STOCK')}
+                </span>
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl font-serif uppercase text-[#174F43] leading-[1.05]">{product.name}</h1>
+
+              {(shortDesc || fullDesc) && (
+                <p className="text-base text-slate-600 font-light leading-relaxed">{shortDesc || fullDesc}</p>
+              )}
+
+              <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1 pt-1">
+                <span className="text-4xl font-serif font-semibold text-[#174F43]">{formatPrice(price)}</span>
+                {hasDiscount && <span className="text-xl font-serif text-slate-400 line-through font-light">{formatPrice(oldPrice)}</span>}
+                {discountPct > 0 && (
+                  <span className="text-xs font-bold bg-[#FF9D00]/15 text-[#9a5b00] border border-[#FF9D00]/40 px-2 py-1" dir="ltr">
+                    {lang === 'ar' ? `وفّر ${discountPct}%` : `SAVE ${discountPct}%`}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 font-light">{t('productDetail.taxesIncluded', 'Taxes & luxury packaging included')}</p>
+            </div>
+
+            {/* Size */}
+            {sortedVariants.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-[0.18em] text-slate-700 font-semibold">{t('productDetail.size', 'Select Size')}</span>
+                  <span className="text-sm text-[#174F43] font-semibold">{selectedVariant?.size}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {sortedVariants.map((variant) => {
+                    const isSelected = selectedVariant?._id === variant._id || selectedVariant?.size === variant.size;
+                    const vOldPrice = variant.compareAtPrice || variant.oldPrice;
+                    const vHasDiscount = vOldPrice && Number(vOldPrice) > Number(variant.price);
+                    return (
+                      <button
+                        key={variant._id || variant.size}
+                        type="button"
+                        onClick={() => setSelectedVariant(variant)}
+                        aria-pressed={isSelected}
+                        className={`relative px-2 py-3.5 text-center border transition-colors cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#174F43] text-white border-[#174F43]'
+                            : 'bg-white text-slate-700 border-slate-300 hover:border-[#174F43]'
+                        }`}
+                      >
+                        {isSelected && (
+                          <span className="absolute top-1.5 end-1.5 w-4 h-4 rounded-full bg-[#FF9D00] text-[#0F3830] flex items-center justify-center">
+                            <Check size={10} strokeWidth={3} />
+                          </span>
+                        )}
+                        <span className="block font-bold text-base">{variant.size}</span>
+                        {vHasDiscount && (
+                          <span className={`block text-xs line-through ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>{formatPrice(vOldPrice)}</span>
+                        )}
+                        <span className={`block text-sm font-semibold mt-0.5 ${isSelected ? 'text-[#FF9D00]' : 'text-[#174F43]'}`}>{formatPrice(variant.price)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity + total + CTAs */}
+            <div className="bg-white border border-slate-200 p-5 space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center border border-slate-300 h-12 w-36 shrink-0 bg-white">
+                  <button type="button" onClick={() => handleQuantityChange(-1)} className="w-11 h-full flex items-center justify-center text-slate-500 hover:text-[#174F43] cursor-pointer" aria-label="Decrease quantity">
+                    <Minus size={15} strokeWidth={1.6} />
+                  </button>
+                  <div className="flex-1 text-center text-base font-semibold text-[#174F43]">{quantity}</div>
+                  <button type="button" onClick={() => handleQuantityChange(1)} className="w-11 h-full flex items-center justify-center text-slate-500 hover:text-[#174F43] cursor-pointer" aria-label="Increase quantity">
+                    <Plus size={15} strokeWidth={1.6} />
+                  </button>
+                </div>
+                <div className="text-end">
+                  <span className="block text-xs uppercase tracking-widest text-slate-500">{lang === 'ar' ? 'الإجمالي' : 'Total'}</span>
+                  <span className="block text-2xl font-serif font-semibold text-[#174F43]">{formatPrice(total)}</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleBuyNow}
+                className="w-full h-14 bg-[#FF9D00] hover:bg-[#E68D00] text-[#0F3830] text-sm font-bold tracking-[0.2em] uppercase transition-colors cursor-pointer"
+              >
+                {lang === 'ar' ? 'اطلب الآن' : 'BUY NOW'}
+              </button>
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className={`w-full h-12 text-xs font-semibold tracking-[0.2em] uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                  addedAnimation ? 'bg-emerald-700 text-white' : 'bg-[#174F43] text-white hover:bg-[#0F3830]'
+                }`}
+              >
+                {addedAnimation ? (
+                  <>
+                    <Check size={16} />
+                    <span>{t('productDetail.addedToCart', 'ADDED TO BAG')}</span>
+                  </>
+                ) : (
+                  <span>{t('productDetail.addToCart', 'ADD TO SHOPPING BAG')}</span>
+                )}
+              </button>
+
+              <div className="grid grid-cols-3 gap-2 pt-1 text-center text-xs text-slate-600">
+                <div className="flex flex-col items-center gap-1.5">
+                  <Truck size={18} className="text-[#174F43]" />
+                  <span>{lang === 'ar' ? 'توصيل 2-4 أيام' : 'Delivery 2–4 days'}</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <ShieldCheck size={18} className="text-[#174F43]" />
+                  <span>{lang === 'ar' ? 'أصلي 100%' : '100% Authentic'}</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <RotateCcw size={18} className="text-[#174F43]" />
+                  <span>{lang === 'ar' ? 'معاينة عند الاستلام' : 'Inspect on delivery'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Notes pyramid */}
+            {noteRows.length > 0 && (
+              <div className="space-y-3">
+                <span className="text-xs uppercase tracking-[0.18em] text-slate-700 font-semibold block">
+                  {lang === 'ar' ? 'الهرم العطري' : 'Fragrance Notes'}
+                </span>
+                <dl className="border border-slate-200 bg-white divide-y divide-slate-200">
+                  {noteRows.map((r) => (
+                    <div key={r.key} className="flex items-baseline gap-4 px-4 py-3">
+                      <dt className="w-20 shrink-0 text-xs uppercase tracking-widest text-[#FF9D00] font-bold">{r.label}</dt>
+                      <dd className="text-sm text-[#174F43]">{r.items.join(' · ')}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
+
+            {/* Performance */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: Clock, label: t('productDetail.longevity', 'Longevity'), val: longevityVal, pct: meter(longevityVal, 14) },
+                { icon: Wind, label: t('productDetail.sillage', 'Sillage'), val: projectionVal, pct: meter(projectionVal, 8) },
+              ].map(({ icon: Icon, label, val, pct }) => (
+                <div key={label} className="bg-white border border-slate-200 p-4 space-y-2">
+                  <div className="flex items-center justify-between text-[#174F43]">
+                    <span className="text-xs uppercase tracking-[0.15em] font-semibold text-slate-500">{label}</span>
+                    <Icon size={17} strokeWidth={1.6} />
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-serif font-bold text-[#174F43]">{val}</span>
+                    <span className="text-xs text-slate-500">{String(val).toLowerCase().includes('hour') ? '' : t('productDetail.hours', 'Hours')}</span>
+                  </div>
+                  <div className="h-1 bg-[#F4F3EF] overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-[#174F43] to-[#FF9D00]" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Best for */}
+            {occasionsList.length > 0 && (
+              <div className="space-y-2.5">
+                <span className="text-xs uppercase tracking-[0.18em] text-slate-700 font-semibold block">{t('productDetail.bestFor', 'Best For')}</span>
+                <div className="flex flex-wrap gap-2">
+                  {occasionsList.map((occ) => {
+                    const meta = getOccasionMeta(occ, lang);
+                    const OccIcon = meta.icon;
+                    return (
+                      <span key={occ} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 text-sm text-[#174F43] font-medium">
+                        <OccIcon size={14} strokeWidth={1.6} />
+                        <span>{meta.label}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Related Fragrances Section */}
+        {/* Related */}
         {relatedProducts.length > 0 && (
-          <div className={`mt-20 pt-12 border-t border-slate-200/80 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-slate-500 block mb-1">
+          <div className="mt-16 pt-10 border-t border-slate-200 text-start">
+            <span className="text-xs uppercase tracking-[0.25em] text-[#FF9D00] font-semibold block mb-1">
               {lang === 'ar' ? 'قد يعجبك أيضاً' : 'You May Also Like'}
             </span>
-            <h3 className="text-xl sm:text-2xl font-serif uppercase text-[#174F43] mb-6">
+            <h3 className="text-2xl sm:text-3xl font-serif uppercase text-[#174F43] mb-6">
               {lang === 'ar' ? 'إبداعات عطرية متكاملة' : 'Complementary Creations'}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8">
-              {relatedProducts.map((rel) => (
-                <ProductCard key={rel._id || rel.id} product={rel} />
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {relatedProducts.map((rel) => {
+                const rp = translateProduct ? translateProduct(rel) : rel;
+                const rid = rp._id || rp.id || rp.slug;
+                const rimg = rp.mainImage?.url || rp.images?.find((i) => i.role === 'main')?.url || rp.images?.[0]?.url || '/img/product.png';
+                const { minPrice, maxPrice, isRange } = getProductPriceSummary(rp);
+                return (
+                  <Link
+                    key={rid}
+                    to={`/product/${rid}`}
+                    className="group flex items-stretch bg-white border border-slate-200 hover:border-[#174F43] transition-colors overflow-hidden"
+                  >
+                    <div className="w-28 sm:w-32 shrink-0 bg-[#E9E8E6]">
+                      <img
+                        src={rimg}
+                        alt={rp.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.onerror = null; e.target.src = '/img/product.png'; }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 p-4 flex flex-col justify-center gap-1">
+                      {rp.fragranceFamily && (
+                        <span className="text-xs uppercase tracking-widest text-slate-500 truncate">{rp.fragranceFamily}</span>
+                      )}
+                      <span className="font-serif text-xl uppercase text-[#174F43] truncate">{rp.name}</span>
+                      <span className="text-sm font-semibold text-[#174F43]">
+                        {isRange ? `${minPrice.toLocaleString()} – ${maxPrice.toLocaleString()}` : minPrice.toLocaleString()}{' '}
+                        <span className="text-xs font-medium">{t('common.currency', 'EGP')}</span>
+                      </span>
+                    </div>
+                    <span className="self-center pe-4 text-[#174F43] transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+                      {isRTL ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

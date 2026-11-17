@@ -67,9 +67,9 @@ const translations = {
       f4Desc: 'Direct to your door in 2-4 days with Metro station pickup in Cairo.',
     },
     mostWanted: {
-      tag: 'CURATED SELECTION',
-      title: 'MOST WANTED FRAGRANCES',
-      desc: 'Discover our most celebrated signature fragrances crafted for indelible presence.',
+      tag: 'TRENDING NOW',
+      title: 'THE VIRAL PICKS',
+      desc: 'The fragrances everyone is talking about: loved, shared and restocked again and again.',
       viewAll: 'View Full Collection',
     },
     aboutSection: {
@@ -468,9 +468,9 @@ const translations = {
       f4Desc: 'توصيل للباب خلال 2-4 أيام مع خيار الاستلام من محطات المترو بالقاهرة.',
     },
     mostWanted: {
-      tag: 'مختارات حصرية',
-      title: 'العطور الأكثر طلباً',
-      desc: 'اكتشف العطور الأكثر شهرة وإقبالاً والمصنوعة لتمنحك حضوراً آسراً.',
+      tag: 'الأكثر تداولاً الآن',
+      title: 'العطور الفيرال',
+      desc: 'العطور اللي الكل بيتكلم عنها: محبوبة ومتشاركة وبتخلص وبترجع تاني وتاني.',
       viewAll: 'عرض كامل المجموعة',
     },
     aboutSection: {

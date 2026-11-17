@@ -60,7 +60,8 @@ export default function SEOHead({
     updateMeta('og:title', pageTitle, 'property');
     updateMeta('og:description', pageDesc, 'property');
     updateMeta('og:type', type, 'property');
-    updateMeta('og:image', image.startsWith('http') ? image : `https://m20fragrance.com${image}`, 'property');
+    const ogImg = (typeof image === 'string' ? image : image?.url) || '/img/hero.png';
+    updateMeta('og:image', ogImg.startsWith('http') ? ogImg : `https://m20fragrance.com${ogImg}`, 'property');
     updateMeta('og:locale', isAr ? 'ar_EG' : 'en_EG', 'property');
     updateMeta('og:locale:alternate', isAr ? 'en_EG' : 'ar_EG', 'property');
     updateMeta('og:site_name', isAr ? 'دار M20 للعطور الفاخرة' : 'M20 Haute Parfumerie', 'property');
@@ -91,8 +92,10 @@ export default function SEOHead({
       // Product Schema
       const activeVariant = product.variants?.[0] || {};
       const productPrice = Math.round(Number(activeVariant.price || product.price || 750));
-      const productImg = product.mainImage || product.images?.[0] || image;
-      const fullImgUrl = productImg?.startsWith('http') ? productImg : `https://m20fragrance.com${productImg}`;
+      const toUrl = (v) => (typeof v === 'string' ? v : v?.url || '');
+      const productImg =
+        toUrl(product.mainImage) || toUrl(product.images?.[0]) || toUrl(image) || '/img/product.png';
+      const fullImgUrl = productImg.startsWith('http') ? productImg : `https://m20fragrance.com${productImg}`;
 
       schemaData = {
         '@context': 'https://schema.org/',

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import OfferCarousel from '../components/OfferCarousel';
+import ProductShowcase3D from '../components/ProductShowcase3D';
 import BrandMarquee from '../components/BrandMarquee';
 import MostWanted from '../components/MostWanted';
 import SignatureFilmSection from '../components/SignatureFilmSection';
@@ -55,17 +56,20 @@ const HomePage = () => {
       {/* Offer Carousel */}
       <OfferCarousel />
 
-      {/* Quiet M20 Brand Ribbon */}
-      <BrandMarquee />
+      {/* 3D Product Showcase Slider */}
+      <ProductShowcase3D products={homeData?.featuredProducts} />
 
-      {/* Most Wanted 3-column Grid */}
+      {/* Viral / trending picks 3-column grid */}
       <MostWanted products={homeData?.featuredProducts} />
-
-      {/* M20 CRUSH 3D Signature Film */}
-      <SignatureFilmSection />
 
       {/* Special Offers Banner */}
       <OffersSection offers={homeData?.offers} />
+
+      {/* Quiet M20 Brand Ribbon: divider from shopping into the brand story */}
+      <BrandMarquee />
+
+      {/* M20 CRUSH 3D Signature Film */}
+      <SignatureFilmSection />
 
       {/* About M20 Banner */}
       <AboutElan />

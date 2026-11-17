@@ -36,6 +36,10 @@
   --font-display: 'Ara Hamah 1982', 'AraHamah1982-Regular', 'Montserrat', sans-serif;
   --font-sans: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-cairo: 'Cairo', system-ui, -apple-system, sans-serif;
+
+  /* Premium typography: never squeeze letters together (the display font is already condensed) */
+  --tracking-tighter: 0.005em;
+  --tracking-tight: 0.015em;
 }
 
 @layer base {
@@ -56,6 +60,13 @@
     --color-text-muted: #64748b;
     --radius-base: 2px;
     --overlay-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Never let any element push the page sideways */
+  html,
+  body {
+    overflow-x: clip;
+    max-width: 100%;
   }
 
   body {
@@ -112,6 +123,25 @@
   body.rtl .font-serif,
   body.rtl .font-display {
     font-family: 'Cairo', system-ui, -apple-system, sans-serif !important;
+  }
+
+  /* Latin display headings: airy tracking reads as luxury */
+  html:not([dir="rtl"]) h1,
+  html:not([dir="rtl"]) h2 {
+    letter-spacing: 0.04em;
+  }
+
+  /* Arabic must never be letter-spaced: it breaks the joined letterforms */
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4,
+  html[dir="rtl"] .font-serif,
+  html[lang="ar"] h1,
+  html[lang="ar"] h2,
+  html[lang="ar"] h3,
+  html[lang="ar"] h4 {
+    letter-spacing: 0 !important;
   }
 
   *:focus-visible {

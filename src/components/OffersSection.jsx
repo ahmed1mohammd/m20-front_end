@@ -113,7 +113,7 @@ const OffersSection = ({ offers: propOffers }) => {
                             to="/offers"
                             onMouseEnter={() => setHoveredIdx(idx)}
                             onFocus={() => setHoveredIdx(idx)}
-                            className="group/row flex items-center justify-between gap-4 py-3.5 transition-colors"
+                            className="group/row flex items-center justify-between gap-4 py-4 transition-colors"
                           >
                             <div className="flex items-baseline gap-4 min-w-0">
                               <span
@@ -125,7 +125,9 @@ const OffersSection = ({ offers: propOffers }) => {
                               </span>
                               <div className="min-w-0">
                                 <h3
-                                  className={`text-sm font-medium truncate transition-transform duration-300 ${
+                                  dir="auto"
+                                  style={{ fontFamily: "'Montserrat', 'Cairo', system-ui, sans-serif" }}
+                                  className={`text-base font-medium leading-snug transition-transform duration-300 ${
                                     isHighlighted
                                       ? isRTL
                                         ? 'text-[#174F43] -translate-x-1'
@@ -136,7 +138,7 @@ const OffersSection = ({ offers: propOffers }) => {
                                   {offer.title}
                                 </h3>
                                 {offer.subtitle && (
-                                  <p className="text-[11px] text-slate-400 font-light truncate mt-0.5">
+                                  <p dir="auto" style={{ fontFamily: "'Montserrat', 'Cairo', system-ui, sans-serif" }} className="text-[13px] text-slate-500 font-light leading-relaxed mt-0.5 line-clamp-2">
                                     {offer.subtitle}
                                   </p>
                                 )}
@@ -145,11 +147,11 @@ const OffersSection = ({ offers: propOffers }) => {
 
                             <div className="flex items-center gap-3 shrink-0">
                               {offer.bundlePrice ? (
-                                <span className="text-xs font-semibold text-[#174F43]">
+                                <span className="text-sm font-semibold text-[#174F43] whitespace-nowrap">
                                   {offer.bundlePrice} EGP
                                 </span>
                               ) : offer.badge ? (
-                                <span className="text-[10px] uppercase tracking-[0.18em] text-[#FF9D00] font-semibold">
+                                <span dir="auto" className="text-xs uppercase tracking-[0.12em] text-[#FF9D00] font-semibold whitespace-nowrap">
                                   {offer.badge}
                                 </span>
                               ) : null}

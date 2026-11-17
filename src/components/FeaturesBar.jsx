@@ -44,8 +44,8 @@ const FeaturesBar = () => {
                     className="text-[#174F43] group-hover:text-[#FF9D00] group-hover:scale-110 transition-all duration-300 shrink-0"
                   />
                   <div>
-                    <h4 className="text-xs font-semibold text-[#174F43] tracking-wide">{feature.title}</h4>
-                    <p className="text-xs text-slate-500 font-light mt-0.5">{feature.description}</p>
+                    <h4 className="text-[13px] font-semibold text-[#174F43] tracking-wide">{feature.title}</h4>
+                    <p className="text-[13px] leading-relaxed text-slate-500 font-light mt-0.5">{feature.description}</p>
                   </div>
                 </div>
               </Reveal>

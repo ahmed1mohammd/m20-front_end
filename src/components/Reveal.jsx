@@ -52,7 +52,12 @@ const Reveal = ({
     return () => observer.disconnect();
   }, [isVisible, once, threshold]);
 
-  const hiddenTransform = (DIRECTION_TRANSFORMS[direction] || DIRECTION_TRANSFORMS.up)(distance);
+  // 3D entrance: sections tip up from the floor (rotateX) while rising into place.
+  const rotateX = direction === 'up' ? 12 : 0;
+  const hiddenTransform = `perspective(1000px) rotateX(${rotateX}deg) ${(
+    DIRECTION_TRANSFORMS[direction] || DIRECTION_TRANSFORMS.up
+  )(distance)}`;
+  const shownTransform = 'perspective(1000px) rotateX(0deg) translate3d(0, 0, 0)';
 
   return (
     <div
@@ -60,7 +65,8 @@ const Reveal = ({
       className={className}
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translate3d(0, 0, 0)' : hiddenTransform,
+        transform: isVisible ? shownTransform : hiddenTransform,
+        transformOrigin: '50% 100%',
         transitionProperty: 'opacity, transform',
         transitionDuration: `${duration}ms`,
         transitionDelay: `${delay}ms`,

@@ -17,7 +17,7 @@ import { getPublicSettings } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 
 const Footer = () => {
-  const [logoSrc, setLogoSrc] = useState('/img/m20-logo-emerald.png');
+  const [logoSrc, setLogoSrc] = useState('/img/m20-logo-white.png');
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [openSection, setOpenSection] = useState(null);
@@ -74,161 +74,13 @@ const Footer = () => {
   const cleanPhone = socialLinks.phone.replace(/[^0-9+]/g, '');
 
   return (
-    <footer className="relative bg-[#0F3830] text-white border-t border-[#174F43] selection:bg-[#FF9D00] selection:text-[#0F3830] overflow-hidden">
+    <footer className="relative bg-[#0F3830] text-white border-t border-[#0F3830] selection:bg-[#FF9D00] selection:text-[#0F3830] overflow-hidden">
       
-      {/* ========================================================
-          1. Continuous Moving Brand Typographic Texture (Watermark)
-          ======================================================== */}
-      <div 
-        className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 flex flex-col justify-around py-2 opacity-100"
-        aria-hidden="true"
-      >
-        {/* Track 1: Moving Left */}
-        <div className="w-full overflow-hidden">
-          <div className="m20-marquee-left whitespace-nowrap">
-            <div className="flex items-center gap-7 pr-7 text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-[0.28em] uppercase text-white/[0.05]">
-              <span>M20 PARFUMS</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>CAIRO</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>EXTRAIT DE PARFUM</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>LEAVE YOUR MARK</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>HAUTE PARFUMERIE</span>
-              <span className="text-white/[0.03]">•</span>
-            </div>
-            <div className="flex items-center gap-7 pr-7 text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-[0.28em] uppercase text-white/[0.05]">
-              <span>M20 PARFUMS</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>CAIRO</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>EXTRAIT DE PARFUM</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>LEAVE YOUR MARK</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>HAUTE PARFUMERIE</span>
-              <span className="text-white/[0.03]">•</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Track 2: Moving Right */}
-        <div className="w-full overflow-hidden">
-          <div className="m20-marquee-right whitespace-nowrap">
-            <div className="flex items-center gap-7 pr-7 text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-[0.28em] uppercase text-white/[0.045]">
-              <span>HAUTE PARFUMERIE</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>CAIRO</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>EXTRAIT DE PARFUM</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20 PARFUMS</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>LEAVE YOUR MARK</span>
-              <span className="text-white/[0.03]">•</span>
-            </div>
-            <div className="flex items-center gap-7 pr-7 text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-[0.28em] uppercase text-white/[0.045]">
-              <span>HAUTE PARFUMERIE</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>CAIRO</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>EXTRAIT DE PARFUM</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20 PARFUMS</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>LEAVE YOUR MARK</span>
-              <span className="text-white/[0.03]">•</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Track 3: Moving Left */}
-        <div className="w-full overflow-hidden">
-          <div className="m20-marquee-left whitespace-nowrap">
-            <div className="flex items-center gap-7 pr-7 text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-[0.28em] uppercase text-white/[0.05]">
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>EXTRAIT DE PARFUM</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20 PARFUMS</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>CAIRO</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>LEAVE YOUR MARK</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>HAUTE PARFUMERIE</span>
-              <span className="text-white/[0.03]">•</span>
-            </div>
-            <div className="flex items-center gap-7 pr-7 text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-[0.28em] uppercase text-white/[0.05]">
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>EXTRAIT DE PARFUM</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20 PARFUMS</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>CAIRO</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>LEAVE YOUR MARK</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>HAUTE PARFUMERIE</span>
-              <span className="text-white/[0.03]">•</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Track 4: Moving Right */}
-        <div className="w-full overflow-hidden">
-          <div className="m20-marquee-right whitespace-nowrap">
-            <div className="flex items-center gap-7 pr-7 text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-[0.28em] uppercase text-white/[0.045]">
-              <span>M20 PARFUMS</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>LEAVE YOUR MARK</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>HAUTE PARFUMERIE</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>CAIRO</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>EXTRAIT DE PARFUM</span>
-              <span className="text-white/[0.03]">•</span>
-            </div>
-            <div className="flex items-center gap-7 pr-7 text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-[0.28em] uppercase text-white/[0.045]">
-              <span>M20 PARFUMS</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>LEAVE YOUR MARK</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>HAUTE PARFUMERIE</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>M20</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>CAIRO</span>
-              <span className="text-white/[0.03]">•</span>
-              <span>EXTRAIT DE PARFUM</span>
-              <span className="text-white/[0.03]">•</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* ========================================================
           2. Compact Newsletter Section ("THE M20 PRIVÉ")
           ======================================================== */}
       <div className="relative border-b border-white/10 bg-transparent z-10">
-        <div className="max-w-[1200px] mx-auto px-5 sm:px-6 py-5 sm:py-6 relative z-10">
+        <div className="w-full px-5 sm:px-8 lg:px-12 py-5 sm:py-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-center">
             
             {/* Newsletter Editorial Intro */}
@@ -285,7 +137,7 @@ const Footer = () => {
       {/* ========================================================
           3. Main Content Section (Restored Logo & Compact Columns)
           ======================================================== */}
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-6 py-6 sm:py-8 relative z-10 bg-transparent">
+      <div className="w-full px-5 sm:px-8 lg:px-12 py-6 sm:py-8 relative z-10 bg-transparent">
         
         {/* ----------------------------------------------------
             A. MOBILE VIEW (block md:hidden)
@@ -296,7 +148,7 @@ const Footer = () => {
           <div className="text-center space-y-2">
             <Link 
               to="/" 
-              className="inline-flex bg-[#F4F3EF] px-3 py-1.5 rounded-sm shadow-xs hover:opacity-95 transition-opacity mx-auto" 
+              className="inline-flex hover:opacity-90 transition-opacity mx-auto"
               aria-label="M20 Home"
             >
               <img 
@@ -486,7 +338,7 @@ const Footer = () => {
             <div>
               <Link 
                 to="/" 
-                className="inline-flex w-fit bg-[#F4F3EF] px-3 py-1.5 rounded-sm shadow-xs hover:opacity-95 transition-opacity" 
+                className="inline-flex w-fit hover:opacity-90 transition-opacity"
                 aria-label="M20 Home"
               >
                 <img 
