@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { getProductPriceSummary } from '../utils/productPricing';
 import { ShoppingBag } from 'lucide-react';
 import { trackAddToCart } from '../utils/tracking';
+import { isPreOrder } from '../utils/preorder';
 import Tilt3D from './Tilt3D';
 
 const ProductCard = ({ product: rawProduct }) => {
@@ -80,6 +81,11 @@ const ProductCard = ({ product: rawProduct }) => {
           onTouchEnd={() => setTimeout(() => setTouchActive(false), 2500)}
         >
           <div className="relative w-full h-full">
+            {isPreOrder(product) && (
+              <span className={`absolute top-2 ${isRTL ? 'right-2' : 'left-2'} z-10 bg-[#FF9D00] text-[#0F3830] text-[10px] font-bold tracking-widest uppercase px-2 py-1`}>
+                {isRTL ? 'طلب مسبق' : 'Pre-order'}
+              </span>
+            )}
             {/* Primary Main Image */}
             <img
               src={primaryImg}

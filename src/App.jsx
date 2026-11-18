@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import AnnouncementBar from './components/AnnouncementBar';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import AuthModal from './components/AuthModal';
-import { LanguageProvider } from './context/LanguageContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import HomePage from './pages/HomePage';
@@ -38,17 +38,45 @@ function RouteAndTrackingWatcher() {
   return null;
 }
 
+function StorePausedScreen({ status }) {
+  const { lang } = useLanguage();
+  const isAr = lang === 'ar';
+  const msg = (isAr ? status.messageAr : status.messageEn) || status.messageAr || status.messageEn;
+  const back = status.resumeAt
+    ? new Date(status.resumeAt).toLocaleString(isAr ? 'ar-EG' : 'en-GB', { dateStyle: 'long', timeStyle: 'short' })
+    : '';
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#F4F3EF] px-6 text-center" dir={isAr ? 'rtl' : 'ltr'}>
+      <div className="max-w-md space-y-4">
+        <img src="/img/m20-logo-emerald.png" alt="M20" className="h-14 mx-auto" onError={(e) => { e.target.style.display = 'none'; }} />
+        <h1 className="text-2xl font-serif text-[#174F43] uppercase">{isAr ? 'المتجر متوقف مؤقتاً' : 'Temporarily Paused'}</h1>
+        <p className="text-sm text-slate-600 leading-relaxed">{msg}</p>
+        {back && <p className="text-xs text-slate-500">{isAr ? 'موعد العودة المتوقع: ' : 'Expected back: '}{back}</p>}
+      </div>
+    </div>
+  );
+}
+
 function AppContent() {
+  const [storeStatus, setStoreStatus] = useState(null);
+
   useEffect(() => {
     captureAttribution();
     getPublicSettings()
       .then((settings) => {
+        if (settings?.storeStatus?.paused) {
+          setStoreStatus(settings.storeStatus);
+        }
         if (settings?.tracking) {
           initTracking(settings.tracking);
         }
       })
       .catch(() => {});
   }, []);
+
+  if (storeStatus?.paused) {
+    return <StorePausedScreen status={storeStatus} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-[#F4F3EF] text-[#0B0B0B]">

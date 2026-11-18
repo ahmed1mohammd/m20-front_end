@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import SEO from '../components/SEO';
 import { trackInitiateCheckout, trackPurchase } from '../utils/tracking';
+import { isPreOrder } from '../utils/preorder';
 import { getStoredAttribution, getMetaCookies } from '../utils/attribution';
 
 const DEFAULT_PAYMENT_CONFIG = {
@@ -581,6 +582,14 @@ const CheckoutPage = () => {
             <h1 className="text-2xl font-serif text-[#174F43] uppercase">{t.checkout.pageTitle}</h1>
             <p className="text-xs text-slate-500 mt-1">{t.checkout.step1} & {t.checkout.step2}</p>
           </div>
+
+          {cart.some((i) => isPreOrder(i.product)) && (
+            <div className="border border-[#FF9D00] bg-[#FFF7E6] px-4 py-3 text-xs text-[#7A4B00]">
+              {lang === 'ar'
+                ? 'يحتوي طلبك على منتج متاح بالطلب المسبق، وسيتم شحنه عند توفره حسب الموعد المذكور في صفحة المنتج.'
+                : 'Your order includes a pre-order item. It will ship once available, as stated on the product page.'}
+            </div>
+          )}
 
           {/* Customer info */}
           <div className="space-y-3 pt-2">
