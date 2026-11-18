@@ -2,13 +2,12 @@
 import ProductCard from './ProductCard';
 import Reveal from './Reveal';
 import { useLanguage } from '../context/LanguageContext';
-import { FALLBACK_CATALOG } from '../data/fallbackCatalog';
 
 const MostWanted = ({ products = [] }) => {
   const { t, translateProduct } = useLanguage();
 
-  const sourceProducts = (products && products.length > 0) ? products.slice(0, 3) : FALLBACK_CATALOG.slice(0, 3);
-  const displayProducts = sourceProducts.map((p) => translateProduct(p));
+  const displayProducts = (products || []).slice(0, 3).map((p) => translateProduct(p));
+  if (displayProducts.length === 0) return null;
 
   return (
     <section className="bg-[#F4F3EF] py-12 md:py-16 border-t border-slate-200/80">

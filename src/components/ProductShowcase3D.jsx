@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getProductPriceSummary } from '../utils/productPricing';
-import { FALLBACK_CATALOG } from '../data/fallbackCatalog';
 
 const DURATION = 900; // ms, keep in sync with CSS below
 
@@ -79,8 +78,7 @@ const ProductShowcase3D = ({ products }) => {
   const { t, formatPrice, translateProduct, isRTL } = useLanguage();
   const { addToCart } = useCart();
 
-  const source = products && products.length > 0 ? products.slice(0, 6) : FALLBACK_CATALOG.slice(0, 6);
-  const list = source.map((p) => translateProduct(p));
+  const list = (products || []).slice(0, 6).map((p) => translateProduct(p));
   const count = list.length;
 
   const [index, setIndex] = useState(0);
@@ -158,6 +156,8 @@ const ProductShowcase3D = ({ products }) => {
   const NextIcon = isRTL ? ChevronLeft : ChevronRight;
   const arrowCls =
     'w-11 h-11 rounded-full border border-[#174F43] text-[#174F43] inline-flex items-center justify-center hover:bg-[#174F43] hover:text-white transition-colors cursor-pointer disabled:opacity-40';
+
+  if (count === 0) return null;
 
   return (
     <section className="bg-[#F4F3EF] py-12 md:py-16 overflow-hidden" aria-roledescription="carousel">

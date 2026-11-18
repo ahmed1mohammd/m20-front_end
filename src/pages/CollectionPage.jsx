@@ -6,10 +6,7 @@ import ProductCard from '../components/ProductCard';
 import Reveal from '../components/Reveal';
 import SEO from '../components/SEO';
 import { useLanguage } from '../context/LanguageContext';
-import { FALLBACK_CATALOG } from '../data/fallbackCatalog';
 import { getProductPriceSummary } from '../utils/productPricing';
-
-const FULL_CATALOG = FALLBACK_CATALOG;
 
 const SORTS = [
   { id: 'featured', en: 'Featured', ar: 'المميزة' },
@@ -48,31 +45,12 @@ const CollectionPage = ({ category = 'All', titleKey }) => {
     setSort('featured');
     const fetchCatalog = async () => {
       setLoading(true);
-      let fetched = await getProducts();
-      let baseList = (fetched && fetched.length > 0) ? fetched : FULL_CATALOG;
-
+      const fetched = await getProducts();
+      const baseList = Array.isArray(fetched) ? fetched : [];
       const catUpper = (category || 'All').toUpperCase();
 
-      if (catUpper === 'MEN') {
-        const filtered = baseList.filter(p => {
-          const g = (p.gender || p.category || '').toUpperCase();
-          return g === 'MEN' ||
-            p.name.toLowerCase().includes('noir') ||
-            p.name.toLowerCase().includes('vetiver') ||
-            p.name.toLowerCase().includes('oud') ||
-            p.name.toLowerCase().includes('him');
-        });
-        setProducts(filtered.length > 0 ? filtered : FULL_CATALOG.filter(p => (p.gender || '').toUpperCase() === 'MEN'));
-      } else if (catUpper === 'WOMEN') {
-        const filtered = baseList.filter(p => {
-          const g = (p.gender || p.category || '').toUpperCase();
-          return g === 'WOMEN' ||
-            p.name.toLowerCase().includes('soleil') ||
-            p.name.toLowerCase().includes('iris') ||
-            p.name.toLowerCase().includes('rose') ||
-            p.name.toLowerCase().includes('her');
-        });
-        setProducts(filtered.length > 0 ? filtered : FULL_CATALOG.filter(p => (p.gender || '').toUpperCase() === 'WOMEN'));
+      if (catUpper === 'MEN' || catUpper === 'WOMEN') {
+        setProducts(baseList.filter((p) => (p.gender || p.category || '').toUpperCase() === catUpper));
       } else {
         setProducts(baseList);
       }

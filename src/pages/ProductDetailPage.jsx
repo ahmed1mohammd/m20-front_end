@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProductById, getProducts } from '../services/api';
-import { getFallbackProductById } from '../data/fallbackCatalog';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { sortVariantsBySize, getProductPriceSummary } from '../utils/productPricing';
 import SEO from '../components/SEO';
 import { trackViewContent, trackAddToCart } from '../utils/tracking';
+import { getPreOrderInfo } from '../utils/preorder';
 import {
   Plus,
   Minus,
@@ -127,10 +127,7 @@ const ProductDetailPage = () => {
       setLoading(true);
       setError(null);
       try {
-        let data = await getProductById(id);
-        if (!data) {
-          data = getFallbackProductById(id);
-        }
+        const data = await getProductById(id);
         if (data) {
           setRawProduct(data);
           const sortedVars = sortVariantsBySize(data.variants || []);
@@ -154,17 +151,7 @@ const ProductDetailPage = () => {
         }
       } catch (err) {
         console.error('Error loading product details:', err);
-        const fallback = getFallbackProductById(id);
-        if (fallback) {
-          setRawProduct(fallback);
-          const sortedVars = sortVariantsBySize(fallback.variants || []);
-          const defaultVar = sortedVars.length > 0
-            ? (sortedVars.find((v) => String(v.size).toLowerCase() === '50ml') || sortedVars[0])
-            : { size: '50ml', price: fallback.price || 0, stock: fallback.stock || 0 };
-          setSelectedVariant(defaultVar);
-        } else {
-          setError('Failed to load product details');
-        }
+        setError('Failed to load product details');
       } finally {
         setLoading(false);
       }
@@ -594,12 +581,23 @@ const ProductDetailPage = () => {
                 </div>
               </div>
 
+              {getPreOrderInfo(product, lang) && (
+                <div className="border border-[#FF9D00] bg-[#FFF7E6] px-4 py-3 text-xs text-[#7A4B00] space-y-0.5">
+                  <p className="font-bold tracking-wider uppercase">{lang === 'ar' ? 'متاح للطلب المسبق' : 'Available for pre-order'}</p>
+                  {getPreOrderInfo(product, lang).dateLabel && (
+                    <p>{lang === 'ar' ? 'التوفر المتوقع: ' : 'Expected: '}{getPreOrderInfo(product, lang).dateLabel}</p>
+                  )}
+                  {getPreOrderInfo(product, lang).note && <p>{getPreOrderInfo(product, lang).note}</p>}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={handleBuyNow}
                 className="w-full h-14 bg-[#FF9D00] hover:bg-[#E68D00] text-[#0F3830] text-sm font-bold tracking-[0.2em] uppercase transition-colors cursor-pointer"
               >
-                {lang === 'ar' ? 'اطلب الآن' : 'BUY NOW'}
+                {getPreOrderInfo(product, lang)
+                  ? (lang === 'ar' ? 'اطلب مسبقاً الآن' : 'PRE-ORDER NOW')
+                  : (lang === 'ar' ? 'اطلب الآن' : 'BUY NOW')}
               </button>
               <button
                 type="button"
